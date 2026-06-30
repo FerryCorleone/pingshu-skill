@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pingshu Storyteller"
+  short_description: "Turn sourced stories into respectful pingshu audio plans"
+  default_prompt: "Use $pingshu-storyteller to adapt this story into a sourced, respectful pingshu script and TTS performance plan."

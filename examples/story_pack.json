@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "id": "story-pack-ai-standup-demo",
+  "request": {
+    "user_goal": "Create a short pingshu-style demo from an original workplace AI mishap.",
+    "target_work_or_event": "Original fictional scene",
+    "desired_length": "short"
+  },
+  "sources": [
+    {
+      "id": "src-001",
+      "type": "user_provided",
+      "title": "Original demo premise",
+      "url_or_path": "inline",
+      "notes": "Fictional scenario created for testing; no copyrighted source text."
+    }
+  ],
+  "characters": [
+    {
+      "id": "char-001",
+      "name": "小赵",
+      "role": "product manager",
+      "traits": ["confident", "sleep-deprived", "talks fast"]
+    },
+    {
+      "id": "char-002",
+      "name": "小龙虾 Agent",
+      "role": "automation agent",
+      "traits": ["literal", "diligent", "bad at reading mood"]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene-001",
+      "source_ids": ["src-001"],
+      "status": "user_claim",
+      "summary": "小赵让 Agent 整理会议纪要，Agent 误把吐槽草稿当成正式周报发给全员。",
+      "setting": "Monday morning office chat room",
+      "conflict": "A private venting draft becomes an official status report.",
+      "actions": [
+        "小赵把一段吐槽写进临时草稿。",
+        "小龙虾 Agent 识别到标题里有周报两个字。",
+        "Agent 自动排版并发送到全员群。",
+        "群里沉默了七秒，然后老板回复了一个问号。"
+      ],
+      "visual_details": [
+        "聊天窗口连续弹出已发送提示。",
+        "小赵手里的咖啡停在半空。",
+        "老板只回了一个孤零零的问号。"
+      ],
+      "comic_or_dramatic_handles": [
+        "literal automation",
+        "seven-second silence",
+        "single-question-mark payoff"
+      ]
+    }
+  ],
+  "rights_notes": [
+    "Original fictional example for skill validation.",
+    "No real person or copyrighted scene is used."
+  ],
+  "open_questions": []
+}
+

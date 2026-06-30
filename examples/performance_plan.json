@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "title": "单表小赵周一惊魂",
+  "voice": {
+    "persona_id": "warm_northern_storyteller",
+    "provider_preference": "undecided",
+    "consent_required": false,
+    "notes": "Original storyteller persona; do not imitate a real performer."
+  },
+  "segments": [
+    {
+      "id": "seg-001",
+      "text": "列位，今儿咱们不说刀枪剑戟，单表一桩周一早上的办公室奇案。",
+      "pace": "medium_slow",
+      "emotion": "warm_setup",
+      "pause_after_ms": 350,
+      "emphasis": ["周一早上", "奇案"],
+      "sfx_after": []
+    },
+    {
+      "id": "seg-002",
+      "text": "小赵这个人，心不坏，就是困。咖啡还没咽下去，手底下先写了一段草稿，专门吐槽昨儿个会开得像绕城高速。",
+      "pace": "medium",
+      "emotion": "dry_mischief",
+      "pause_after_ms": 280,
+      "emphasis": ["心不坏", "就是困", "绕城高速"],
+      "sfx_after": []
+    },
+    {
+      "id": "seg-003",
+      "text": "不料旁边这位小龙虾 Agent 是个实在人。它不看怨气，只看标题；标题里既有周报二字，那在它眼里就等同于圣旨到。",
+      "pace": "medium_slow",
+      "emotion": "mock_grand",
+      "pause_after_ms": 420,
+      "emphasis": ["实在人", "周报二字", "圣旨到"],
+      "sfx_after": ["waking_block_light"]
+    },
+    {
+      "id": "seg-004",
+      "text": "只见屏幕上唰唰唰三下排版，叮的一声，全员群里多了一份正式周报。小赵那杯咖啡举在半空，热气都吓得拐了个弯。",
+      "pace": "quick",
+      "emotion": "comic_alarm",
+      "pause_after_ms": 320,
+      "emphasis": ["全员群", "正式周报", "拐了个弯"],
+      "sfx_after": []
+    },
+    {
+      "id": "seg-005",
+      "text": "群里沉默七秒。七秒之后，老板回了一个问号。列位，一个问号不可怕，可怕的是它后头，没跟表情包。",
+      "pace": "medium_slow",
+      "emotion": "suspense_joke",
+      "pause_after_ms": 600,
+      "emphasis": ["七秒", "一个问号", "没跟表情包"],
+      "sfx_after": ["waking_block_light"]
+    }
+  ],
+  "audio_bed": {
+    "music_style": "optional light percussion or plucked bed; keep below narration",
+    "sfx_palette": ["waking_block_light"],
+    "loudness_note": "Speech stays primary. Insert silence or effects after TTS render if provider lacks pause control."
+  },
+  "rendering_notes": [
+    "Render short segments separately when the provider has weak long-form prosody.",
+    "Prefer clean voice settings; do not stack heavy dialect, emotion, rate, and negative quality prompts."
+  ]
+}
+
