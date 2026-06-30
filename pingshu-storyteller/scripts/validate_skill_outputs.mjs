@@ -7,7 +7,9 @@ const target = resolve(process.argv[2] || ".");
 const contracts = {
   "story_pack.json": [
     "schema_version",
+    "id",
     "request",
+    "narrative_brief",
     "sources",
     "characters",
     "scenes",
@@ -55,6 +57,24 @@ function validateRequired(object, fileName) {
 }
 
 function validateStoryPack(object) {
+  const brief = object.narrative_brief;
+  if (!brief || typeof brief !== "object") {
+    throw new Error("story_pack.narrative_brief must be an object");
+  }
+  for (const key of ["hook", "trigger", "causal_chain", "core_conflict", "must_include_details", "outcome", "aftermath", "missing_or_weak_facts"]) {
+    if (!(key in brief)) {
+      throw new Error(`story_pack.narrative_brief is missing ${key}`);
+    }
+  }
+  assertArray(brief.causal_chain, "story_pack.narrative_brief.causal_chain");
+  assertArray(brief.must_include_details, "story_pack.narrative_brief.must_include_details");
+  assertArray(brief.missing_or_weak_facts, "story_pack.narrative_brief.missing_or_weak_facts");
+  if (brief.causal_chain.length < 3) {
+    throw new Error("story_pack.narrative_brief.causal_chain must include at least three links");
+  }
+  if (brief.must_include_details.length < 3) {
+    throw new Error("story_pack.narrative_brief.must_include_details must include at least three details");
+  }
   assertArray(object.sources, "story_pack.sources");
   assertArray(object.characters, "story_pack.characters");
   assertArray(object.scenes, "story_pack.scenes");
@@ -121,4 +141,3 @@ for (const fileName of files) {
 }
 
 console.log(`OK: validated ${checked} pingshu-storyteller artifact(s) in ${base}`);
-

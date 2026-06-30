@@ -6,6 +6,26 @@
     "target_work_or_event": "Original fictional scene",
     "desired_length": "short"
   },
+  "narrative_brief": {
+    "hook": "An agent turns a private venting draft into an official company-wide weekly report.",
+    "trigger": "小赵 writes a complaint-filled draft with the word 周报 in the title.",
+    "causal_chain": [
+      "小赵 writes a temporary venting draft after a tiring meeting.",
+      "小龙虾 Agent detects 周报 in the title and treats it as a task.",
+      "The agent formats and sends the draft to the company-wide chat.",
+      "The boss replies with a single question mark."
+    ],
+    "core_conflict": "Automation is diligent but socially blind, while the human assumed the draft was private.",
+    "must_include_details": [
+      "周报 title misread as command",
+      "coffee frozen in midair",
+      "boss replies with one question mark",
+      "the agent technically completed the task but missed the social context"
+    ],
+    "outcome": "The private draft becomes public, creating an awkward office silence.",
+    "aftermath": "The joke lands on the difference between doing a task correctly and understanding whether it should be done.",
+    "missing_or_weak_facts": []
+  },
   "sources": [
     {
       "id": "src-001",
@@ -61,4 +81,3 @@
   ],
   "open_questions": []
 }
-

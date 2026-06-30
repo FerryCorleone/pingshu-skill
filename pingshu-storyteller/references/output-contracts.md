@@ -11,6 +11,16 @@
     "target_work_or_event": "string",
     "desired_length": "short | medium | long"
   },
+  "narrative_brief": {
+    "hook": "string",
+    "trigger": "string",
+    "causal_chain": ["string"],
+    "core_conflict": "string",
+    "must_include_details": ["string"],
+    "outcome": "string",
+    "aftermath": "string",
+    "missing_or_weak_facts": ["string"]
+  },
   "sources": [
     {
       "id": "src-001",
@@ -109,4 +119,3 @@
   "rendering_notes": ["string"]
 }
 ```
-

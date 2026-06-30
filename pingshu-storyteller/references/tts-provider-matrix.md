@@ -4,6 +4,15 @@
 
 Always create `performance_plan.json` before selecting a TTS provider. The plan should contain text, pause, emphasis, emotion, sound effects, and voice persona in generic terms.
 
+For final audio, require an explicit user choice:
+
+- API TTS: user provides/authorizes credentials for a provider.
+- Local TTS: user installs or points to a local model/runtime.
+
+Do not silently use macOS `say`, Windows Narrator, browser speech synthesis, or other system voices as the final output. They are only acceptable for a clearly labeled smoke test after the user agrees.
+
+Use `scripts/check_tts_readiness.mjs <provider>` before claiming audio rendering is ready.
+
 ## API Providers
 
 | Provider | Good for | Cautions |
@@ -40,3 +49,14 @@ Use `scripts/create_tts_job.mjs` to turn a `performance_plan.json` into a provid
 ## Clean TTS Rule
 
 Do not stack long style prompts, negative quality prompts, SSML, rate changes, and dialect demands all at once. If audio becomes muddy, return to neutral voice settings and improve the script first.
+
+## First-Use Prompt
+
+When no provider is configured, ask:
+
+```text
+这次要生成正式音频，你想走哪条 TTS？
+1. API：OpenAI / 阿里 CosyVoice / MiniMax / ElevenLabs，提供对应 key 或确认环境变量已配置。
+2. 本地模型：CosyVoice / GPT-SoVITS / F5-TTS / IndexTTS，告诉我安装路径或启动命令。
+3. 只做临时试听：可以用系统语音 smoke test，但它不代表最终效果。
+```

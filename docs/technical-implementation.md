@@ -102,6 +102,8 @@ Provider-specific adapters should live outside the core contract or behind small
 
 The first adapter layer is `pingshu-storyteller/scripts/create_tts_job.mjs`, which converts a neutral `performance_plan.json` into a provider-specific job scaffold. It deliberately does not call paid APIs or local models; it records the user's provider choice, required environment variables, segment inputs, and next command hints.
 
+Before final rendering, agents must run `pingshu-storyteller/scripts/check_tts_readiness.mjs <provider>`. If the selected API key or local command is missing, stop and ask the user to configure the provider. System voices are only smoke tests and must not be presented as the final audio product.
+
 ## Story Acquisition Strategy
 
 Use a source ladder:

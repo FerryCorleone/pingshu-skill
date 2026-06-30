@@ -12,7 +12,7 @@
       "id": "seg-001",
       "purpose": "opening",
       "source_scene_ids": ["scene-001"],
-      "text": "列位，今儿咱们不说刀枪剑戟，单表一桩周一早上的办公室奇案。",
+      "text": "列位，今儿咱们单表一桩周一早上的办公室奇案：一个标题，差点把小赵送进全员群现场答辩。",
       "performance": {
         "emotion": "warm_setup",
         "pace": "medium_slow",
@@ -83,4 +83,3 @@
     "No external copyrighted source is used."
   ]
 }
-
