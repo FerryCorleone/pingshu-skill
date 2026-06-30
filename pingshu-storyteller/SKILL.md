@@ -65,9 +65,10 @@ When the user only wants a quick answer, summarize these artifacts in chat but k
 - `scripts/render_tts_plan.mjs <pingshu_script.json> <performance_plan.json>` creates a starter performance plan.
 - `scripts/check_tts_readiness.mjs <provider>` checks whether an API/local provider is ready and prints setup blockers.
 - `scripts/create_tts_job.mjs <performance_plan.json> <provider> <tts_job.json>` creates a provider-specific render job scaffold for API or local TTS.
+- `scripts/render_voxcpm2_plan.py <performance_plan.json> <output_dir>` renders a plan with a local VoxCPM2 Python environment.
 - `scripts/export_plaintext.mjs <pingshu_script.json> <output.txt>` exports readable prose.
 
-Supported provider ids for `create_tts_job.mjs`: `openai`, `aliyun-cosyvoice`, `minimax`, `elevenlabs`, `local-cosyvoice`, `gpt-sovits`, `f5-tts`, `indextts`.
+Supported provider ids for `create_tts_job.mjs`: `openai`, `aliyun-cosyvoice`, `minimax`, `elevenlabs`, `local-cosyvoice`, `local-voxcpm2`, `gpt-sovits`, `f5-tts`, `indextts`.
 
 The scripts use only Node.js built-in modules and should work on macOS, Windows, and Linux.
 

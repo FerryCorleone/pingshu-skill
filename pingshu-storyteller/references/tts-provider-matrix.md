@@ -26,6 +26,7 @@ Use `scripts/check_tts_readiness.mjs <provider>` before claiming audio rendering
 
 | Project | Good for | Cautions |
 | --- | --- | --- |
+| [VoxCPM2 / OpenBMB VoxCPM](https://github.com/OpenBMB/VoxCPM) | Local Chinese TTS with voice design, 48kHz output, and Apple Silicon MPS support | Requires Python 3.10-3.12 and several GB of model weights; use original voice prompts or consented reference audio |
 | [CosyVoice / FunAudioLLM](https://github.com/FunAudioLLM/CosyVoice) | Local Chinese-capable TTS and voice clone experiments | GPU/driver/setup requirements vary |
 | [GPT-SoVITS](https://github.com/RVC-Boss/GPT-SoVITS) | Local few-shot voice workflows | Quality depends on samples and setup |
 | [F5-TTS](https://github.com/SWivid/F5-TTS) | Local voice-cloning style experimentation | Check model/license and Chinese quality for each version |

@@ -44,6 +44,16 @@ const providers = {
       "GPU and model paths vary by machine."
     ]
   },
+  "local-voxcpm2": {
+    mode: "local",
+    required_env: [],
+    command_hint: "python pingshu-storyteller/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir>",
+    notes: [
+      "Install VoxCPM2 in a Python 3.10-3.12 environment with torch and torchaudio.",
+      "Use an original voice-control prompt or consented reference audio; do not clone a real performer without permission.",
+      "The bundled renderer splits by performance_plan segments and concatenates pauses locally."
+    ]
+  },
   "gpt-sovits": {
     mode: "local",
     required_env: [],
@@ -126,4 +136,3 @@ const job = {
 
 writeFileSync(outputPath, `${JSON.stringify(job, null, 2)}\n`, "utf8");
 console.log(`Wrote ${outputPath}`);
-
