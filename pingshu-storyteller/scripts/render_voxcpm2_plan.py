@@ -12,6 +12,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +36,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cache-dir", default=".cache/huggingface", help="Hugging Face cache directory")
     parser.add_argument("--device", default="auto", help="Runtime device: auto, cpu, mps, cuda, cuda:0")
     parser.add_argument("--control", default=DEFAULT_CONTROL, help="Short VoxCPM2 voice-control instruction")
+    parser.add_argument("--segment-performance", action="store_true", help="Append each segment's pace, emotion, and emphasis to the VoxCPM2 control text")
+    parser.add_argument("--pace-tempo", action="store_true", help="Post-process each segment with a light tempo multiplier based on pace")
     parser.add_argument("--cfg-value", type=float, default=2.0, help="CFG guidance scale, recommended 1.0-3.0")
     parser.add_argument("--inference-timesteps", type=int, default=10, help="Inference steps, recommended 4-30")
     parser.add_argument("--normalize", action="store_true", help="Enable VoxCPM text normalization")
@@ -71,6 +74,88 @@ def with_control(text: str, control: str) -> str:
     text = " ".join(text.split())
     control = control.strip()
     return f"({control}){text}" if control else text
+
+
+def segment_control(base_control: str, segment: dict, enabled: bool) -> str:
+    if not enabled:
+        return base_control
+
+    pace = str(segment.get("pace") or "").strip()
+    emotion = str(segment.get("emotion") or "").strip()
+    emphasis = segment.get("emphasis") if isinstance(segment.get("emphasis"), list) else []
+
+    pace_notes = {
+        "slow": "本段慢起，留足停顿，像压住包袱。",
+        "medium_slow": "本段中慢，句尾收住，重点处停一下。",
+        "medium": "本段中速，清楚利落，不拖腔。",
+        "quick": "本段稍快，像抖包袱，转折处要脆。",
+    }
+    emotion_notes = {
+        "sharp_hook": "开头要抓人，有一点挑眉的劲儿。",
+        "dry_trigger": "语气干脆，像把事儿摊开给听众看。",
+        "rising_conflict": "冲突逐步抬高，别一开始就喊满。",
+        "surprised_turn": "转折处先压一下，再突然亮出来。",
+        "payoff": "包袱落点要清楚，带一点笑。",
+        "aftertaste": "收尾稳一点，有回味。",
+        "suspense": "稍微压低，留悬念。",
+        "aside": "像跟听众耳语打趣。",
+    }
+
+    notes = []
+    if pace in pace_notes:
+        notes.append(pace_notes[pace])
+    notes.append(emotion_notes.get(emotion, f"情绪：{emotion}。" if emotion else ""))
+    if emphasis:
+        notes.append("重音放在：" + "、".join(str(item) for item in emphasis[:3]) + "。")
+
+    joined_notes = "".join(note for note in notes if note)
+    if not joined_notes:
+        return base_control
+    return f"{base_control} {joined_notes}".strip()
+
+
+def pace_tempo(segment: dict, enabled: bool) -> float:
+    if not enabled:
+        return 1.0
+    if isinstance(segment.get("tempo"), (int, float)):
+        return float(segment["tempo"])
+    return {
+        "slow": 0.94,
+        "medium_slow": 0.97,
+        "medium": 1.0,
+        "quick": 1.08,
+    }.get(str(segment.get("pace") or ""), 1.0)
+
+
+def apply_tempo(audio: np.ndarray, sample_rate: int, tempo: float, work_dir: Path, stem: str) -> np.ndarray:
+    if abs(tempo - 1.0) < 0.001:
+        return audio
+    if not shutil.which("ffmpeg"):
+        print("Warning: ffmpeg not found; skipping pace tempo post-process", file=sys.stderr)
+        return audio
+
+    tempo = max(0.5, min(2.0, tempo))
+    input_path = work_dir / f"{stem}-tempo-in.wav"
+    output_path = work_dir / f"{stem}-tempo-out.wav"
+    sf.write(input_path, audio, sample_rate, subtype="PCM_16")
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-v",
+            "error",
+            "-i",
+            str(input_path),
+            "-filter:a",
+            f"atempo={tempo:.5f}",
+            str(output_path),
+        ],
+        check=True,
+    )
+    processed, processed_sr = sf.read(output_path, dtype="float32")
+    if processed_sr != sample_rate:
+        raise ValueError(f"Tempo output sample rate {processed_sr} does not match {sample_rate}")
+    return np.asarray(processed, dtype=np.float32).reshape(-1)
 
 
 def audio_stats(audio: np.ndarray, sample_rate: int) -> dict:
@@ -133,54 +218,63 @@ def main() -> int:
     chunks: list[np.ndarray] = []
     manifest_segments = []
 
-    for index, segment in enumerate(segments, start=1):
-        segment_id = segment.get("id") or f"seg-{index:03d}"
-        text = str(segment.get("text") or "").strip()
-        if not text:
-            raise ValueError(f"Segment {segment_id} has empty text")
+    with tempfile.TemporaryDirectory(prefix="voxcpm2-render-") as temp_dir_name:
+        temp_dir = Path(temp_dir_name)
+        for index, segment in enumerate(segments, start=1):
+            segment_id = segment.get("id") or f"seg-{index:03d}"
+            text = str(segment.get("text") or "").strip()
+            if not text:
+                raise ValueError(f"Segment {segment_id} has empty text")
 
-        safe_id = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in segment_id)
-        segment_path = segment_dir / f"{index:03d}-{safe_id}.wav"
+            safe_id = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in segment_id)
+            segment_path = segment_dir / f"{index:03d}-{safe_id}.wav"
+            segment_tempo = pace_tempo(segment, args.pace_tempo)
+            control_text = segment_control(args.control, segment, args.segment_performance)
 
-        if args.skip_existing and segment_path.exists():
-            audio, sr = sf.read(segment_path, dtype="float32")
-            if sr != sample_rate:
-                raise ValueError(f"{segment_path} sample rate {sr} does not match model {sample_rate}")
-            audio = np.asarray(audio, dtype=np.float32).reshape(-1)
-            print(f"Reused {segment_path}", file=sys.stderr)
-        else:
-            final_text = with_control(text, args.control)
-            print(f"Rendering {index}/{len(segments)} {segment_id}: {text[:38]}", file=sys.stderr)
-            audio = model.generate(
-                text=final_text,
-                prompt_wav_path=args.prompt_wav,
-                prompt_text=args.prompt_text,
-                reference_wav_path=args.reference_wav,
-                cfg_value=args.cfg_value,
-                inference_timesteps=args.inference_timesteps,
-                normalize=args.normalize,
-                denoise=args.load_denoiser and bool(args.reference_wav or args.prompt_wav),
+            if args.skip_existing and segment_path.exists():
+                audio, sr = sf.read(segment_path, dtype="float32")
+                if sr != sample_rate:
+                    raise ValueError(f"{segment_path} sample rate {sr} does not match model {sample_rate}")
+                audio = np.asarray(audio, dtype=np.float32).reshape(-1)
+                print(f"Reused {segment_path}", file=sys.stderr)
+            else:
+                final_text = with_control(text, control_text)
+                print(f"Rendering {index}/{len(segments)} {segment_id}: {text[:38]}", file=sys.stderr)
+                audio = model.generate(
+                    text=final_text,
+                    prompt_wav_path=args.prompt_wav,
+                    prompt_text=args.prompt_text,
+                    reference_wav_path=args.reference_wav,
+                    cfg_value=args.cfg_value,
+                    inference_timesteps=args.inference_timesteps,
+                    normalize=args.normalize,
+                    denoise=args.load_denoiser and bool(args.reference_wav or args.prompt_wav),
+                )
+                audio = np.asarray(audio, dtype=np.float32).reshape(-1)
+                audio = apply_tempo(audio, sample_rate, segment_tempo, temp_dir, f"{index:03d}-{safe_id}")
+                sf.write(segment_path, audio, sample_rate, subtype="PCM_16")
+
+            stats = audio_stats(audio, sample_rate)
+            pause_ms = int(segment.get("pause_after_ms") or 0)
+            inserted_pause_ms = pause_ms if index < len(segments) else 0
+
+            chunks.append(audio)
+            if inserted_pause_ms > 0:
+                chunks.append(np.zeros(int(sample_rate * inserted_pause_ms / 1000), dtype=np.float32))
+
+            manifest_segments.append(
+                {
+                    "id": segment_id,
+                    "text": text,
+                    "output_file": str(segment_path),
+                    "pause_after_ms": inserted_pause_ms,
+                    "pace": segment.get("pace"),
+                    "emotion": segment.get("emotion"),
+                    "tempo": round(segment_tempo, 3),
+                    "control": control_text if args.segment_performance else args.control,
+                    **stats,
+                }
             )
-            audio = np.asarray(audio, dtype=np.float32).reshape(-1)
-            sf.write(segment_path, audio, sample_rate, subtype="PCM_16")
-
-        stats = audio_stats(audio, sample_rate)
-        pause_ms = int(segment.get("pause_after_ms") or 0)
-        inserted_pause_ms = pause_ms if index < len(segments) else 0
-
-        chunks.append(audio)
-        if inserted_pause_ms > 0:
-            chunks.append(np.zeros(int(sample_rate * inserted_pause_ms / 1000), dtype=np.float32))
-
-        manifest_segments.append(
-            {
-                "id": segment_id,
-                "text": text,
-                "output_file": str(segment_path),
-                "pause_after_ms": inserted_pause_ms,
-                **stats,
-            }
-        )
 
     final_audio = np.concatenate(chunks) if chunks else np.array([], dtype=np.float32)
     final_wav = output_dir / f"{args.final_name}.wav"
