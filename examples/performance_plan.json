@@ -1,20 +1,31 @@
 {
   "schema_version": "1.0",
-  "title": "单表小赵周一惊魂",
+  "title": "小赵怨写周报稿，龙虾错送全员群",
   "voice": {
     "persona_id": "warm_northern_storyteller",
     "provider_preference": "undecided",
     "consent_required": false,
-    "notes": "Original storyteller persona; do not imitate a real performer."
+    "performance_mode": "single_performer",
+    "timbre_lock": true,
+    "role_voice_policy": "Same storyteller voice for narration and all characters; shift role through wording, pace, pressure, and pauses instead of separate timbres.",
+    "reference_voice": {
+      "required_for_split_render": "recommended",
+      "path_or_id": null,
+      "consent_status": "original"
+    },
+    "notes": "原创的温暖北方说书人，不模仿真实人物。"
   },
   "segments": [
     {
       "id": "seg-001",
-      "text": "列位，今儿咱们单表一桩周一早上的办公室奇案：一个标题，差点把小赵送进全员群现场答辩。",
+      "text": "闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。这故事说的是周一早上的一桩办公室奇案：产品经理小赵写了个吐槽草稿，旁边的小龙虾 Agent 太勤快，一个标题，差点把他送进全员群现场答辩。",
       "pace": "medium_slow",
       "emotion": "warm_setup",
       "pause_after_ms": 350,
-      "emphasis": ["周一早上", "奇案"],
+      "emphasis": [
+        "周一早上",
+        "奇案"
+      ],
       "sfx_after": []
     },
     {
@@ -23,17 +34,27 @@
       "pace": "medium",
       "emotion": "dry_mischief",
       "pause_after_ms": 280,
-      "emphasis": ["心不坏", "就是困", "绕城高速"],
+      "emphasis": [
+        "心不坏",
+        "就是困",
+        "绕城高速"
+      ],
       "sfx_after": []
     },
     {
       "id": "seg-003",
-      "text": "不料旁边这位小龙虾 Agent 是个实在人。它不看怨气，只看标题；标题里既有周报二字，那在它眼里就等同于圣旨到。",
+      "text": "不料旁边这位小龙虾 Agent 是个实在人。它一寻思：标题里有周报，那不就是让我发吗？它不看怨气，只看标题；标题里既有周报二字，那在它眼里就等同于圣旨到。",
       "pace": "medium_slow",
       "emotion": "mock_grand",
       "pause_after_ms": 420,
-      "emphasis": ["实在人", "周报二字", "圣旨到"],
-      "sfx_after": ["waking_block_light"]
+      "emphasis": [
+        "实在人",
+        "周报二字",
+        "圣旨到"
+      ],
+      "sfx_after": [
+        "waking_block"
+      ]
     },
     {
       "id": "seg-004",
@@ -41,7 +62,11 @@
       "pace": "quick",
       "emotion": "comic_alarm",
       "pause_after_ms": 320,
-      "emphasis": ["全员群", "正式周报", "拐了个弯"],
+      "emphasis": [
+        "全员群",
+        "正式周报",
+        "拐了个弯"
+      ],
       "sfx_after": []
     },
     {
@@ -50,17 +75,43 @@
       "pace": "medium_slow",
       "emotion": "suspense_joke",
       "pause_after_ms": 600,
-      "emphasis": ["七秒", "一个问号", "没跟表情包"],
-      "sfx_after": ["waking_block_light"]
+      "emphasis": [
+        "七秒",
+        "一个问号",
+        "没跟表情包"
+      ],
+      "sfx_after": [
+        "waking_block"
+      ]
     }
   ],
   "audio_bed": {
     "music_style": "optional light percussion or plucked bed; keep below narration",
-    "sfx_palette": ["waking_block_light"],
+    "sfx_palette": [
+      "waking_block"
+    ],
+    "prop_sfx_policy": {
+      "allowed_ids": [
+        "waking_block"
+      ],
+      "insert_mode": "post_tts_timeline",
+      "short_episode_max_hits": 2,
+      "minimum_gap_sec": 45,
+      "default_gain_db": -6,
+      "post_sfx_pause_ms": 420,
+      "post_sfx_pause_min_ms": 320,
+      "post_sfx_pause_max_ms": 650,
+      "notes": "醒木只做少量定场和回扣，不写进朗读文本。"
+    },
     "loudness_note": "Speech stays primary. Insert silence or effects after TTS render if provider lacks pause control."
   },
   "rendering_notes": [
-    "Render short segments separately when the provider has weak long-form prosody.",
-    "Prefer clean voice settings; do not stack heavy dialect, emotion, rate, and negative quality prompts."
+    "Keep one stable storyteller timbre across all segments; do not assign separate character voices.",
+    "Render short scripts in a single pass when the provider drifts across split segments.",
+    "Render split segments only with the same provider voice id or the same local reference/prompt voice.",
+    "For final pingshu timing, expand important segments into events: say for spoken text and pause for real inserted silence.",
+    "Insert waking block SFX only as post-processed audio blocks from assets/sfx; do not ask TTS to say SFX labels.",
+    "Prefer clean voice settings; do not stack heavy dialect, emotion, rate, and negative quality prompts.",
+    "Generated from examples/pingshu_script.json to examples/performance_plan.json."
   ]
 }

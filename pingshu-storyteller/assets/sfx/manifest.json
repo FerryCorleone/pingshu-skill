@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-04T11:37:20+08:00",
+  "generator": {
+    "name": "Stable Audio Studio",
+    "model_family": "Stable Audio 3",
+    "runtime": "local generation"
+  },
+  "rights_note": "本目录音效为本机生成资产。使用、商用或再分发前，请按 Stability AI 当前许可证和可接受使用政策确认范围：https://stability.ai/license 与 https://stability.ai/use-policy。",
+  "assets": [
+    {
+      "id": "waking_block",
+      "file": "waking_block.wav",
+      "duration_sec": 0.355,
+      "sample_rate": 48000,
+      "channels": 1,
+      "trim": {
+        "source_duration_sec": 3.0,
+        "start_sec": 0.105,
+        "end_sec": 0.46,
+        "reason": "裁掉开头约 0.12 秒静音和后面约 2.6 秒尾部空白，只保留醒木本体与短桌面余响。"
+      },
+      "postprocess": "48kHz mono PCM, short fade-in/out, -1.5 dB gain",
+      "use": "唯一默认醒木。用于开书定场、关键转折留扣或结尾收束；短节目通常只用一次，最多两次。"
+    }
+  ],
+  "mixing_defaults": {
+    "insert_mode": "post_tts_timeline",
+    "gain_db": -6,
+    "post_sfx_pause_ms": 420,
+    "post_sfx_pause_min_ms": 320,
+    "post_sfx_pause_max_ms": 650,
+    "minimum_gap_sec": 45,
+    "short_episode_max_hits": 2,
+    "medium_episode_max_hits": 3,
+    "long_episode_rule": "每 4-5 分钟最多 1 次，且不要连续两段都用。"
+  }
+}

@@ -25,6 +25,19 @@ DEFAULT_CONTROL = (
     "语速中等，带一点笑意，但不要夸张"
 )
 
+VOICE_LOCK_CONTROL = (
+    "全程保持同一个单人说书者音色；不要给不同角色切换成不同声音、年龄或性别；"
+    "角色区别只用语气、轻重音、停顿和节奏表现。"
+)
+
+SFX_ALIASES = {
+    "waking_block_soft": "waking_block",
+    "waking_block_firm": "waking_block",
+    "waking_block_light": "waking_block",
+    "waking_block_medium": "waking_block",
+    "waking_block_close": "waking_block",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -36,8 +49,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cache-dir", default=".cache/huggingface", help="Hugging Face cache directory")
     parser.add_argument("--device", default="auto", help="Runtime device: auto, cpu, mps, cuda, cuda:0")
     parser.add_argument("--control", default=DEFAULT_CONTROL, help="Short VoxCPM2 voice-control instruction")
-    parser.add_argument("--segment-performance", action="store_true", help="Append each segment's pace, emotion, and emphasis to the VoxCPM2 control text")
+    parser.add_argument("--segment-performance", action="store_true", help="Append stable prosody notes for each segment without changing voice identity")
     parser.add_argument("--pace-tempo", action="store_true", help="Post-process each segment with a light tempo multiplier based on pace")
+    parser.add_argument("--single-pass", action="store_true", help="Render all segments in one generation call to maximize timbre consistency for short scripts")
+    parser.add_argument("--no-voice-lock", dest="voice_lock", action="store_false", help="Disable the default single-performer timbre lock")
     parser.add_argument("--cfg-value", type=float, default=2.0, help="CFG guidance scale, recommended 1.0-3.0")
     parser.add_argument("--inference-timesteps", type=int, default=10, help="Inference steps, recommended 4-30")
     parser.add_argument("--normalize", action="store_true", help="Enable VoxCPM text normalization")
@@ -49,7 +64,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--skip-existing", action="store_true", help="Reuse existing per-segment WAV files")
     parser.add_argument("--max-segments", type=int, default=0, help="Render only the first N segments")
     parser.add_argument("--final-name", default="final_voxcpm2", help="Base name for final audio files")
+    parser.add_argument("--sfx-gain-db", type=float, default=-6.0, help="Gain applied to post-processed SFX assets")
     parser.add_argument("--no-m4a", action="store_true", help="Do not create AAC .m4a with ffmpeg")
+    parser.set_defaults(voice_lock=True)
     return parser.parse_args()
 
 
@@ -76,6 +93,25 @@ def with_control(text: str, control: str) -> str:
     return f"({control}){text}" if control else text
 
 
+def should_prepend_control(args: argparse.Namespace, control: str) -> bool:
+    """VoxCPM2 prompt continuation treats prompt_text as real text context.
+
+    When prompt_text/prompt_wav are used, prepending parenthesized control text can
+    be synthesized aloud as part of the target utterance. Keep those controls in
+    the manifest, but do not add them to the spoken text.
+    """
+    return bool(control.strip()) and not bool(args.prompt_text)
+
+
+def voice_locked_control(base_control: str, enabled: bool) -> str:
+    base_control = " ".join(base_control.split())
+    if not enabled:
+        return base_control
+    if VOICE_LOCK_CONTROL in base_control:
+        return base_control
+    return f"{base_control} {VOICE_LOCK_CONTROL}".strip()
+
+
 def segment_control(base_control: str, segment: dict, enabled: bool) -> str:
     if not enabled:
         return base_control
@@ -85,10 +121,10 @@ def segment_control(base_control: str, segment: dict, enabled: bool) -> str:
     emphasis = segment.get("emphasis") if isinstance(segment.get("emphasis"), list) else []
 
     pace_notes = {
-        "slow": "本段慢起，留足停顿，像压住包袱。",
+        "slow": "本段慢起，留足停顿，压住包袱。",
         "medium_slow": "本段中慢，句尾收住，重点处停一下。",
         "medium": "本段中速，清楚利落，不拖腔。",
-        "quick": "本段稍快，像抖包袱，转折处要脆。",
+        "quick": "本段稍快，短句连起来，转折处要脆。",
     }
     emotion_notes = {
         "sharp_hook": "开头要抓人，有一点挑眉的劲儿。",
@@ -112,6 +148,139 @@ def segment_control(base_control: str, segment: dict, enabled: bool) -> str:
     if not joined_notes:
         return base_control
     return f"{base_control} {joined_notes}".strip()
+
+
+def pause_marker(milliseconds: int) -> str:
+    """Best-effort separator for single-pass audition text.
+
+    Final pingshu renders should prefer event-level pause items, which become real
+    silence. Do not encode long pauses as ellipses here: VoxCPM2 may synthesize
+    them as filler syllables such as "啊", and doubled punctuation can flatten the
+    planned rhythm.
+    """
+    if milliseconds >= 750:
+        return "\n\n"
+    if milliseconds > 0:
+        return "\n"
+    return "\n"
+
+
+def build_single_pass_segment(segments: list[dict]) -> dict:
+    parts = []
+    source_ids = []
+    for segment in segments:
+        if isinstance(segment.get("events"), list):
+            event_parts = []
+            for event in segment["events"]:
+                if str(event.get("type") or "say") == "pause":
+                    event_parts.append(pause_marker(int(event.get("ms") or event.get("duration_ms") or 0)))
+                else:
+                    event_parts.append(str(event.get("text") or "").strip())
+            text = "".join(event_parts).strip()
+        else:
+            text = str(segment.get("text") or "").strip()
+        if not text:
+            continue
+        source_ids.append(segment.get("id"))
+        pause_ms = int(segment.get("pause_after_ms") or 0)
+        parts.append(text + pause_marker(pause_ms))
+    combined_text = "".join(parts).strip()
+    return {
+        "id": "single-pass",
+        "text": combined_text,
+        "pace": "mixed",
+        "emotion": "single_performer_storytelling",
+        "pause_after_ms": 0,
+        "source_segment_ids": source_ids,
+    }
+
+
+def build_render_items(segments: list[dict]) -> list[dict]:
+    items: list[dict] = []
+    for segment_index, segment in enumerate(segments, start=1):
+        segment_id = segment.get("id") or f"seg-{segment_index:03d}"
+        base = {
+            "parent_segment_id": segment_id,
+            "pace": segment.get("pace"),
+            "emotion": segment.get("emotion"),
+            "tempo": segment.get("tempo"),
+            "emphasis": segment.get("emphasis"),
+            "sfx_after": segment.get("sfx_after"),
+            "source_segment_ids": segment.get("source_segment_ids"),
+        }
+        events = segment.get("events")
+        if not isinstance(events, list):
+            items.append(
+                {
+                    **base,
+                    "kind": "say",
+                    "id": segment_id,
+                    "text": str(segment.get("text") or "").strip(),
+                    "pause_after_ms": int(segment.get("pause_after_ms") or 0),
+                }
+            )
+            continue
+
+        event_items: list[dict] = []
+        for event_index, event in enumerate(events, start=1):
+            event_type = str(event.get("type") or "say").strip()
+            event_id = event.get("id") or f"{segment_id}-ev-{event_index:02d}"
+            if event_type in ("say", "utterance"):
+                text = str(event.get("text") or "").strip()
+                if not text:
+                    continue
+                event_items.append(
+                    {
+                        **base,
+                        "kind": "say",
+                        "id": event_id,
+                        "text": text,
+                        "pace": event.get("pace", base["pace"]),
+                        "emotion": event.get("emotion", base["emotion"]),
+                        "tempo": event.get("tempo", base["tempo"]),
+                        "emphasis": event.get("emphasis", base["emphasis"]),
+                        "sfx_after": event.get("sfx_after"),
+                        "pause_after_ms": int(event.get("pause_after_ms") or 0),
+                    }
+                )
+            elif event_type in ("pause", "silence"):
+                milliseconds = int(event.get("ms") or event.get("duration_ms") or 0)
+                if milliseconds <= 0:
+                    continue
+                event_items.append(
+                    {
+                        **base,
+                        "kind": "pause",
+                        "id": event_id,
+                        "duration_ms": milliseconds,
+                        "reason": event.get("reason"),
+                        "sfx_after": event.get("sfx_after"),
+                    }
+                )
+            else:
+                raise ValueError(f"Unsupported performance event type in {segment_id}: {event_type}")
+
+        segment_sfx_after = normalize_sfx_ids(base.get("sfx_after"))
+        if segment_sfx_after:
+            for item in reversed(event_items):
+                if item.get("kind") == "say":
+                    item["sfx_after"] = normalize_sfx_ids(item.get("sfx_after")) + segment_sfx_after
+                    break
+        items.extend(event_items)
+
+        trailing_pause = int(segment.get("pause_after_ms") or 0)
+        if trailing_pause > 0:
+            items.append(
+                {
+                    **base,
+                    "kind": "pause",
+                    "id": f"{segment_id}-trailing-pause",
+                    "duration_ms": trailing_pause,
+                    "reason": "segment_pause_after_ms",
+                    "sfx_after": None,
+                }
+            )
+    return items
 
 
 def pace_tempo(segment: dict, enabled: bool) -> float:
@@ -167,6 +336,95 @@ def audio_stats(audio: np.ndarray, sample_rate: int) -> dict:
     }
 
 
+def normalize_sfx_ids(value) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    normalized: list[str] = []
+    for raw in value:
+        sfx_id = str(raw or "").strip()
+        if not sfx_id:
+            continue
+        normalized.append(SFX_ALIASES.get(sfx_id, sfx_id))
+    return normalized
+
+
+def default_sfx_dir() -> Path:
+    return Path(__file__).resolve().parents[1] / "assets" / "sfx"
+
+
+def resample_linear(audio: np.ndarray, source_rate: int, target_rate: int) -> np.ndarray:
+    if source_rate == target_rate:
+        return audio
+    if audio.size == 0:
+        return audio
+    duration = audio.size / float(source_rate)
+    target_size = max(1, int(round(duration * target_rate)))
+    source_x = np.linspace(0.0, duration, num=audio.size, endpoint=False)
+    target_x = np.linspace(0.0, duration, num=target_size, endpoint=False)
+    return np.interp(target_x, source_x, audio).astype(np.float32)
+
+
+def audio_to_mono_float32(audio) -> np.ndarray:
+    arr = np.asarray(audio, dtype=np.float32)
+    if arr.ndim == 2:
+        if arr.shape[0] == 1:
+            arr = arr[0]
+        elif arr.shape[1] == 1:
+            arr = arr[:, 0]
+        else:
+            arr = np.mean(arr, axis=-1)
+    if arr.ndim != 1:
+        arr = arr.reshape(-1)
+    return np.clip(arr, -1.0, 1.0).astype(np.float32)
+
+
+def load_sfx_audio(sfx_id: str, sample_rate: int, gain_db: float = -6.0) -> tuple[np.ndarray, dict]:
+    resolved_id = SFX_ALIASES.get(sfx_id, sfx_id)
+    asset_path = default_sfx_dir() / f"{resolved_id}.wav"
+    if not asset_path.exists():
+        raise FileNotFoundError(f"SFX asset not found for {sfx_id}: {asset_path}")
+    audio, asset_rate = sf.read(asset_path, dtype="float32")
+    audio = audio_to_mono_float32(audio)
+    audio = resample_linear(audio, asset_rate, sample_rate)
+    audio = np.clip(audio * (10 ** (gain_db / 20.0)), -1.0, 1.0).astype(np.float32)
+    return audio, {
+        "id": resolved_id,
+        "source_id": sfx_id,
+        "asset_file": str(asset_path),
+        "gain_db": gain_db,
+        **audio_stats(audio, sample_rate),
+    }
+
+
+def append_sfx_after(chunks: list[np.ndarray], item: dict, sample_rate: int, gain_db: float) -> list[dict]:
+    records: list[dict] = []
+    for sfx_id in normalize_sfx_ids(item.get("sfx_after")):
+        audio, record = load_sfx_audio(sfx_id, sample_rate, gain_db=gain_db)
+        chunks.append(audio)
+        records.append(record)
+    return records
+
+
+def pause_after_sfx_ms(
+    item: dict,
+    planned_ms: int,
+    has_later_item: bool,
+    next_item: dict | None = None,
+    default_ms: int = 420,
+    minimum_ms: int = 320,
+    maximum_ms: int = 650,
+) -> int:
+    if not has_later_item:
+        return 0
+    if not normalize_sfx_ids(item.get("sfx_after")):
+        return max(planned_ms, 0)
+    if next_item and next_item.get("kind") == "pause":
+        return 0
+    if planned_ms <= 0:
+        return default_ms
+    return min(max(planned_ms, minimum_ms), maximum_ms)
+
+
 def encode_m4a(wav_path: Path, m4a_path: Path) -> bool:
     if not shutil.which("ffmpeg"):
         return False
@@ -204,6 +462,39 @@ def main() -> int:
     if args.max_segments > 0:
         segments = segments[: args.max_segments]
 
+    plan_voice = plan.get("voice") if isinstance(plan.get("voice"), dict) else {}
+    voice_lock = args.voice_lock and plan_voice.get("timbre_lock", True) is not False
+    if plan_voice.get("performance_mode") not in (None, "single_performer"):
+        print(
+            "Warning: performance_plan.voice.performance_mode is not single_performer; "
+            "pingshu-storyteller expects one narrator voice.",
+            file=sys.stderr,
+        )
+    if voice_lock and not args.single_pass and not (args.reference_wav or args.prompt_wav):
+        print(
+            "Warning: split rendering without reference/prompt audio can still drift; "
+            "use --single-pass for short scripts or provide --reference-wav/--prompt-wav for stronger voice lock.",
+            file=sys.stderr,
+        )
+    if args.single_pass:
+        if any(isinstance(segment.get("events"), list) for segment in segments):
+            print(
+                "Warning: --single-pass flattens event-level pauses into text separators. "
+                "Use event-level rendering for final pingshu audio and ASR-audit the result.",
+                file=sys.stderr,
+            )
+        combined = build_single_pass_segment(segments)
+        text_len = len(combined["text"])
+        if text_len > 1800:
+            print(
+                f"Warning: single-pass text is {text_len} characters; "
+                "if VoxCPM2 struggles, split with a stable reference voice.",
+                file=sys.stderr,
+        )
+        segments = [combined]
+    render_items = build_render_items(segments)
+    say_item_count = sum(1 for item in render_items if item["kind"] == "say")
+
     print("Loading VoxCPM2...", file=sys.stderr)
     model = VoxCPM.from_pretrained(
         hf_model_id=args.model,
@@ -217,19 +508,46 @@ def main() -> int:
 
     chunks: list[np.ndarray] = []
     manifest_segments = []
+    base_control = voice_locked_control(args.control, voice_lock)
+    prepend_control = should_prepend_control(args, base_control)
+    if base_control and not prepend_control:
+        print(
+            "Info: prompt_text is set; control text will be recorded in the manifest "
+            "but not prepended to the spoken text.",
+            file=sys.stderr,
+        )
 
     with tempfile.TemporaryDirectory(prefix="voxcpm2-render-") as temp_dir_name:
         temp_dir = Path(temp_dir_name)
-        for index, segment in enumerate(segments, start=1):
-            segment_id = segment.get("id") or f"seg-{index:03d}"
+        say_index = 0
+        for item_index, segment in enumerate(render_items, start=1):
+            segment_id = segment.get("id") or f"item-{item_index:03d}"
+            if segment.get("kind") == "pause":
+                pause_ms = int(segment.get("duration_ms") or 0)
+                if pause_ms > 0:
+                    chunks.append(np.zeros(int(sample_rate * pause_ms / 1000), dtype=np.float32))
+                sfx_after = append_sfx_after(chunks, segment, sample_rate, args.sfx_gain_db)
+                manifest_segments.append(
+                    {
+                        "id": segment_id,
+                        "kind": "pause",
+                        "duration_ms": pause_ms,
+                        "reason": segment.get("reason"),
+                        "parent_segment_id": segment.get("parent_segment_id"),
+                        "sfx_after": sfx_after,
+                    }
+                )
+                continue
+
+            say_index += 1
             text = str(segment.get("text") or "").strip()
             if not text:
                 raise ValueError(f"Segment {segment_id} has empty text")
 
             safe_id = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in segment_id)
-            segment_path = segment_dir / f"{index:03d}-{safe_id}.wav"
+            segment_path = segment_dir / f"{say_index:03d}-{safe_id}.wav"
             segment_tempo = pace_tempo(segment, args.pace_tempo)
-            control_text = segment_control(args.control, segment, args.segment_performance)
+            control_text = segment_control(base_control, segment, args.segment_performance)
 
             if args.skip_existing and segment_path.exists():
                 audio, sr = sf.read(segment_path, dtype="float32")
@@ -238,8 +556,8 @@ def main() -> int:
                 audio = np.asarray(audio, dtype=np.float32).reshape(-1)
                 print(f"Reused {segment_path}", file=sys.stderr)
             else:
-                final_text = with_control(text, control_text)
-                print(f"Rendering {index}/{len(segments)} {segment_id}: {text[:38]}", file=sys.stderr)
+                final_text = with_control(text, control_text) if prepend_control else " ".join(text.split())
+                print(f"Rendering {say_index}/{say_item_count} {segment_id}: {text[:38]}", file=sys.stderr)
                 audio = model.generate(
                     text=final_text,
                     prompt_wav_path=args.prompt_wav,
@@ -251,14 +569,21 @@ def main() -> int:
                     denoise=args.load_denoiser and bool(args.reference_wav or args.prompt_wav),
                 )
                 audio = np.asarray(audio, dtype=np.float32).reshape(-1)
-                audio = apply_tempo(audio, sample_rate, segment_tempo, temp_dir, f"{index:03d}-{safe_id}")
+                audio = apply_tempo(audio, sample_rate, segment_tempo, temp_dir, f"{say_index:03d}-{safe_id}")
                 sf.write(segment_path, audio, sample_rate, subtype="PCM_16")
 
             stats = audio_stats(audio, sample_rate)
-            pause_ms = int(segment.get("pause_after_ms") or 0)
-            inserted_pause_ms = pause_ms if index < len(segments) else 0
+            has_later_item = item_index < len(render_items)
 
             chunks.append(audio)
+            sfx_after = append_sfx_after(chunks, segment, sample_rate, args.sfx_gain_db)
+            next_item = render_items[item_index] if has_later_item else None
+            inserted_pause_ms = pause_after_sfx_ms(
+                segment,
+                int(segment.get("pause_after_ms") or 0),
+                has_later_item,
+                next_item,
+            )
             if inserted_pause_ms > 0:
                 chunks.append(np.zeros(int(sample_rate * inserted_pause_ms / 1000), dtype=np.float32))
 
@@ -268,10 +593,14 @@ def main() -> int:
                     "text": text,
                     "output_file": str(segment_path),
                     "pause_after_ms": inserted_pause_ms,
+                    "kind": "say",
+                    "parent_segment_id": segment.get("parent_segment_id"),
                     "pace": segment.get("pace"),
                     "emotion": segment.get("emotion"),
                     "tempo": round(segment_tempo, 3),
-                    "control": control_text if args.segment_performance else args.control,
+                    "control": control_text,
+                    "source_segment_ids": segment.get("source_segment_ids"),
+                    "sfx_after": sfx_after,
                     **stats,
                 }
             )
@@ -293,14 +622,22 @@ def main() -> int:
         "title": plan.get("title"),
         "sample_rate": sample_rate,
         "device": args.device,
-        "control": args.control,
+        "control": base_control,
+        "control_prepended_to_text": prepend_control,
+        "voice_lock": voice_lock,
+        "single_pass": args.single_pass,
+        "reference_wav": str(Path(args.reference_wav).resolve()) if args.reference_wav else None,
+        "prompt_wav": str(Path(args.prompt_wav).resolve()) if args.prompt_wav else None,
+        "sfx_gain_db": args.sfx_gain_db,
         "final_wav": str(final_wav),
         "final_m4a": str(final_m4a) if m4a_created else None,
         "final_stats": audio_stats(final_audio, sample_rate),
         "segments": manifest_segments,
         "notes": [
             "Generated with an original voice-control prompt, not a real performer clone.",
-            "SFX/music bed from performance_plan.json is not mixed by this script.",
+            "Voice lock keeps one solo storyteller timbre; character contrast should come from prosody and wording.",
+            "Sparse waking block SFX from performance_plan.json is inserted as post-processed audio, never sent to TTS text.",
+            "Music bed from performance_plan.json is not mixed by this script.",
         ],
     }
     manifest_path = output_dir / "voxcpm2_render_manifest.json"

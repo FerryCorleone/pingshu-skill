@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "title": "一张保单催孝子，半截梯子砸亲爹",
+  "created_at": "2026-07-04T00:00:00.000Z",
+  "source_audio": {
+    "path": "/path/to/final-audio.m4a",
+    "format": "m4a",
+    "duration_sec": 240.5,
+    "bytes": 5242880,
+    "qa_status": "passed",
+    "rights_status": "uncertain"
+  },
+  "user_prompt": "音频已生成。要不要上传到网易云音乐云盘？不需要的话我直接交付本地音频文件。",
+  "default_delivery": {
+    "target": "local-file",
+    "status": "ready",
+    "instructions": [
+      "把 source_audio.path 作为最终音频文件交付给用户。",
+      "如果用户需要在常用音乐 App 里听，再进入 netease-cloud 目标。"
+    ]
+  },
+  "targets": [
+    {
+      "id": "local-file",
+      "enabled": true,
+      "requires_user_confirmation": false,
+      "status": "ready",
+      "instructions": [
+        "直接交付本地文件路径。",
+        "可附带格式、时长、ASR 回检状态和权利状态说明。"
+      ]
+    },
+    {
+      "id": "netease-cloud",
+      "enabled": false,
+      "requires_user_confirmation": true,
+      "status": "needs-readiness-check",
+      "readiness_command": "node pingshu-storyteller/scripts/check_delivery_readiness.mjs netease-cloud",
+      "publish_command_hint": "node pingshu-storyteller/scripts/publish_netease_cloud.mjs <audio_path> <manifest.json>",
+      "setup_notes": [
+        "首次使用需要 Agent 安装网易云音乐官方 ncm-cli：npm install -g @music163/ncm-cli。",
+        "首次使用需要 Agent 打开网易云音乐开放平台：https://developer.music.163.com/st/developer/apply/account?type=INDIVIDUAL。",
+        "用户在网页里取得 API 凭证后，Agent 运行 setup_netease_cloud.mjs，用本机输入框收 App ID / Private Key，并写入 ncm-cli 配置。",
+        "上传前 Agent 打开用户可见的 ncm-cli login 二维码窗口，用户用网易云音乐 App 扫码登录。",
+        "不要把 app key、private key、cookie 或 token 写入任何产物。"
+      ]
+    }
+  ],
+  "publish_manifest_path": null,
+  "notes": [
+    "网易云上传只在用户确认后执行。",
+    "涉及版权作品或二创片段时，默认上传到个人云盘或本地收听，不默认公开发布。"
+  ]
+}

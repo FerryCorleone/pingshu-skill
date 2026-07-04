@@ -1,103 +1,143 @@
-# Story Sourcing Guide
+# 素材获取指南
 
-## Source Ladder
+## 来源阶梯
 
-Use the highest reliable rung available:
+优先使用更可靠的来源：
 
-1. Public-domain or licensed primary text.
-2. Official synopsis, episode guide, press kit, public transcript, or creator-provided material.
-3. User-provided files, links, screenshots, subtitles, or notes.
-4. Multiple independent recaps as leads.
-5. Selective video/keyframe inspection for missing visual detail.
+1. 公版或已授权原文。
+2. 官方简介、剧集指南、新闻稿、公开转录或创作者提供素材。
+3. 用户提供的文件、链接、截图、字幕或笔记。
+4. 多个独立 recap 只作为线索。
+5. 缺少视觉细节时，再选择性检查视频或关键帧。
 
-## Minimum Viable Story Pack
+## 最小可用 story pack
 
-A useful `story_pack` needs:
+一个可用的 `story_pack` 至少需要：
 
-- who is present,
-- where and when the scene happens,
-- what each person wants,
-- what sparked the conflict,
-- what made it escalate,
-- what physically happens,
-- what changes after the scene,
-- what the audience would repeat to a friend,
-- at least two concrete details for important scenes,
-- source links or source notes,
-- explicit uncertainty.
+- 谁在场；
+- 场景发生在哪里、什么时候；
+- 每个人想要什么；
+- 冲突由什么具体动作触发；
+- 冲突如何升级；
+- 身体或物件上实际发生了什么；
+- 场景之后发生了什么变化；
+- 观众会转述给朋友的点是什么；
+- 重要场景至少两个具体细节；
+- 来源链接或来源说明；
+- 明确不确定点。
 
-## Required Narrative Brief
+## 必需剧情简报
 
-Before writing pingshu prose, create a compact `narrative_brief` in `story_pack`:
+写评书正文之前，在 `story_pack` 里创建紧凑的 `narrative_brief`：
 
 ```json
 {
-  "hook": "Why should a listener care in the first 5 seconds?",
-  "trigger": "The first concrete thing that started the story.",
-  "causal_chain": ["A happened", "so B reacted", "which caused C"],
-  "core_conflict": "The emotional/social contest, not just the topic.",
-  "must_include_details": ["specific interview moment", "specific comeback", "specific reversal"],
-  "outcome": "What settled or changed the situation.",
-  "aftermath": "What people joked about or argued after the outcome.",
-  "missing_or_weak_facts": ["facts not yet verified"]
+  "hook": "前 5 秒为什么值得听？",
+  "trigger": "故事最初被点燃的具体动作。",
+  "causal_chain": ["A 发生了", "所以 B 反应", "导致 C"],
+  "core_conflict": "情绪或社会关系上的冲突，不只是话题名。",
+  "must_include_details": ["具体采访瞬间", "具体回击", "具体反转"],
+  "outcome": "事情如何落地或发生变化。",
+  "aftermath": "后续大家争论、调侃或记住了什么。",
+  "missing_or_weak_facts": ["仍未核实的事实"]
 }
 ```
 
-If `trigger`, `causal_chain`, or `must_include_details` are generic, keep sourcing. Do not fill the gap with pingshu filler.
+如果 `trigger`、`causal_chain` 或 `must_include_details` 很泛，就继续找素材。不要用评书套话补洞。
 
-## Current-Event Standard
+## 名场面保真
 
-For trending internet stories, the minimum useful chain is:
+用户点名“名场面”“经典片段”“综艺名片段”“采访片段”或某个具体场景时，不能只抽剧情梗概，还要单独抽 `signature_moments`。名场面的价值通常不在“发生了什么”四个字里，而在观众已经记住的那一句话、那个表情、那个动作、那个物件和镜头里的权力关系。
 
-```text
-trigger -> online interpretation -> counter-reaction -> escalation -> real-world result -> post-result memes
+`signature_moments` 至少记录：
+
+- 短关键台词或外语原句，尤其是标题、梗、名句本身；
+- 可见动作、站位、手势、物件、反应和场面调度；
+- 这些点分别来自哪些来源；
+- 哪些必须短句保留，哪些只做转述，哪些用视觉重建；
+- 如何在评书里保留记忆点，同时避免复刻长对白。
+
+示例：
+
+```json
+{
+  "type": "iconic_line",
+  "content": "Say my name",
+  "source_ids": ["src-001"],
+  "include_policy": "must_quote_short",
+  "transform_note": "这句短英文是片段标题和记忆点，正文必须听见原句，再用中文评书语气解释反差。"
+}
 ```
 
-The script should explain this chain clearly before leaning on performance style.
+版权作品里，短关键台词可以作为评论和转述的必要锚点；不要因此把整段对白照搬。综艺和采访也一样：观众记住的原话要尽量短、准、清楚，其他部分用自己的话讲。
 
-## Handling Recap Creators
+## 热点事件标准
 
-Recap videos and posts can help identify which scenes matter, but do not copy their wording or structure. Treat them as secondary sources.
+讲互联网热点时，最小可用链条是：
 
-When using recap material:
+```text
+触发点 -> 网友如何解读 -> 对方如何反击 -> 如何升级 -> 现实结果 -> 结果后的梗
+```
 
-- cite it as a source,
-- extract factual claims and timestamp hints,
-- corroborate important details where possible,
-- rewrite from the `story_pack`, not from the recap prose.
+脚本应该先把这条链讲清楚，再使用表演风格。
 
-## Handling Long Video
+## 处理解说/recap 创作者
 
-Do not default to full-video multimodal understanding. Use staged extraction:
+解说视频和帖子可以帮助判断哪些场景重要，但不能复制他们的文字或结构。把它们当二手来源。
 
-1. Get transcript/subtitles if available.
-2. Ask the user for timestamps if they know the moment.
-3. Search for scene summaries or episode guides.
-4. Sample only key windows for visual details.
-5. Add visual observations to `scene.visual_details` with uncertainty.
+使用 recap 时：
 
-## Uncertainty Language
+- 记录为来源；
+- 提取事实主张和时间戳线索；
+- 重要细节尽量交叉验证；
+- 从 `story_pack` 重写，不从 recap 文案重写。
 
-Use clear tags:
+## 处理长视频
 
-- `confirmed`: directly supported by source.
-- `inferred`: reasonable inference from source.
-- `uncertain`: insufficient support.
-- `user_claim`: provided by user but not independently verified.
+不要默认整段做多模态理解。分阶段抽取：
 
-If a requested work cannot be sourced, say so and offer a generic original story in the same theme instead.
+1. 先拿字幕或 ASR。
+2. 如果用户知道时间戳，先让用户给。
+3. 搜索场景简介或剧集指南。
+4. 只抽样关键窗口找视觉细节。
+5. 把视觉观察写进 `scene.visual_details`，并标注不确定。
 
-## Failure To Avoid
+## 本地 ASR 复用规则
 
-Bad output:
+转录平台视频或音频前，检查用户是否已有 ASR 工作流或 Hugging Face 模型缓存。
 
-- "双方网友吵起来了" without the interview, quote, post, or concrete spark.
-- generic "football kingdom versus anime dream" when the actual viral hook was more specific.
-- pingshu phrases that take space but do not add story information.
+推荐顺序：
 
-Good output:
+1. 找现有项目脚本，看是否已经解决同类 ASR 问题。
+2. 运行 `scripts/check_asr_cache.mjs mlx-community/whisper-large-v3-mlx` 或等价缓存检查。
+3. 如果有合适缓存，用 `uvx --from mlx-whisper mlx_whisper` 或现有项目 runner。
+4. 对 recap 或表演样本，使用 `--condition-on-previous-text False`，减少长上下文带来的重复幻觉。
+5. 下载新 ASR 模型或切换 ASR 家族前先问用户。
 
-- names the spark,
-- shows why each side felt provoked,
-- includes the best reversal or payoff,
-- uses pingshu rhythm to sharpen the facts, not hide missing facts.
+做风格研究时，ASR 文本是分析节奏和结构的证据，不是可复制的来源文本。明显的人名识别错误可以在笔记中修正，然后只提取可迁移手法。
+
+## 不确定性标记
+
+使用清楚标签：
+
+- `confirmed`：来源直接支持。
+- `inferred`：从来源合理推断。
+- `uncertain`：证据不足。
+- `user_claim`：用户提供但未独立核实。
+
+如果无法找到用户要求内容的来源，直接说明，并可提供同主题的原创故事作为替代。
+
+## 要避免的失败
+
+坏输出：
+
+- 只写“双方网友吵起来了”，没有采访、原话、帖子或具体导火索。
+- 真实钩子很具体，却写成泛泛的“足球王国大战动漫梦想”。
+- 评书词占篇幅，却不增加故事信息。
+
+好输出：
+
+- 说清楚导火索；
+- 解释双方为什么觉得被冒犯；
+- 包含最好笑或最锋利的反转；
+- 用评书节奏强化事实，不是遮住缺失事实。

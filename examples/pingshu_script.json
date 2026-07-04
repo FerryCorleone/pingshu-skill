@@ -1,18 +1,77 @@
 {
   "schema_version": "1.0",
-  "title": "单表小赵周一惊魂",
+  "title": "小赵怨写周报稿，龙虾错送全员群",
   "story_pack_id": "story-pack-ai-standup-demo",
   "storyteller_persona": {
     "id": "warm_northern_storyteller",
-    "description": "Original warm northern storyteller, not modeled after a real person.",
-    "dialect_level": "light"
+    "description": "原创的温暖北方说书人，不模仿真实人物。",
+    "dialect_level": "light",
+    "performance_mode": "single_performer",
+    "voice_consistency": "全程同一个说书人音色"
+  },
+  "story_design": {
+    "logline": "一个员工把吐槽草稿写成周报标题，勤快但不懂人情世故的 Agent 直接发进全员群，把一次自动化成功变成职场惊魂。",
+    "audience_entry": "听众需要先知道这是一个办公室自动化乌龙：小赵只是写草稿，小龙虾 Agent 却把标题里的“周报”当成正式任务。",
+    "entertainment_promise": "好玩在一个过分勤快的 Agent 把职场吐槽当正式任务，越高效越闯祸。",
+    "humor_engine": "办公室日常错位、机器字面理解、人类社交语境失效、老板问号回扣。",
+    "title_design": {
+      "episode_title": "小赵怨写周报稿，龙虾错送全员群",
+      "style_reference": "回目式喜剧标题：前半句写小赵写怨气草稿，后半句写小龙虾 Agent 错把草稿送进全员群。",
+      "title_formula": "人物 + 情绪动作 + 物件，人物/Agent + 错误动作 + 公共场合。",
+      "comic_hook": "标题把私人怨气和全员公开撞在一块，先制造职场事故感。",
+      "opening_line": "第一段用“闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。”入书，然后立刻交代办公室、周一、草稿和误发风险。"
+    },
+    "technique_arrangement": {
+      "overall_strategy": "开头用回目式标题和一句轻定场说明这是办公室奇案，中段只给 Agent 一个字面理解的脑内逻辑，其余段落直走事故链。",
+      "technique_budget": {
+        "first_person_inner_monologue_max": 1,
+        "traditional_flavor_max": 2,
+        "catchphrase_max": 2
+      },
+      "first_person_inner_monologue_slots": [
+        {
+          "segment_id": "seg-003",
+          "character": "小龙虾 Agent",
+          "trigger": "Agent 识别到标题里的“周报”并准备执行。",
+          "plot_relevance": "这段解释为什么 Agent 会把吐槽草稿当成正式周报发送。",
+          "decision_pressure": "标题里有明确任务词，Agent 的目标是尽快完成任务而不是判断社交语境。",
+          "bad_idea_logic": "它把“标题含周报”等同于“用户要发周报”，于是把字面正确当成整体正确。",
+          "action_payoff": "脑内逻辑落地为自动排版并发送到全员群。",
+          "voice_shape": "短促、字面化、像任务系统自己给自己下命令。",
+          "boundary_note": "这是虚构 Agent 的喜剧化逻辑，不涉及真人动机。"
+        }
+      ],
+      "traditional_flavor_slots": [
+        {
+          "segment_id": "seg-001",
+          "type": "short_opening",
+          "purpose": "用“闲言少叙，书归正传”和回目式标题轻轻定调，不拉长古风。",
+          "restraint": "只放一句，马上回到现代办公室事故。"
+        },
+        {
+          "segment_id": "seg-005",
+          "type": "waking_block_callback",
+          "purpose": "结尾用“列位”把老板问号压成醒木式回扣。",
+          "restraint": "只作收口，不继续展开道理。"
+        }
+      ],
+      "leave_plain_slots": ["seg-002", "seg-004"],
+      "restraint_notes": "短样例不追求满堂彩，重点是让事故链清楚、包袱落在问号上。"
+    },
+    "central_question": "这份不该公开的周报发出去以后，小赵怎么面对全员群和老板的反应。",
+    "protagonist_arc": "小赵从困倦吐槽的普通员工，变成被自动化推到台前答辩的人。",
+    "stakes": "真正的风险不是文档格式错了，而是私人吐槽被当成正式表达，社交语境被机器误读。",
+    "beat_order": ["cold_hook", "context", "trigger", "complication", "low_point", "resolution"],
+    "opening_contract": "前两段先交代这是办公室、周一、草稿和 Agent 误读标题的事故，不让听众只听见俏皮话。",
+    "ending_contract": "结尾落在一个问号造成的职场压力，兑现“技术完成任务但没理解人”的笑点。"
   },
   "segments": [
     {
       "id": "seg-001",
-      "purpose": "opening",
+      "purpose": "cold_hook",
       "source_scene_ids": ["scene-001"],
-      "text": "列位，今儿咱们单表一桩周一早上的办公室奇案：一个标题，差点把小赵送进全员群现场答辩。",
+      "story_function": "用反常结果开场：一个标题把私人草稿推成公开事故。",
+      "text": "闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。这故事说的是周一早上的一桩办公室奇案：产品经理小赵写了个吐槽草稿，旁边的小龙虾 Agent 太勤快，一个标题，差点把他送进全员群现场答辩。",
       "performance": {
         "emotion": "warm_setup",
         "pace": "medium_slow",
@@ -23,8 +82,9 @@
     },
     {
       "id": "seg-002",
-      "purpose": "setup",
+      "purpose": "context",
       "source_scene_ids": ["scene-001"],
+      "story_function": "交代小赵的状态和草稿背景，让误发事故有现实入口。",
       "text": "小赵这个人，心不坏，就是困。咖啡还没咽下去，手底下先写了一段草稿，专门吐槽昨儿个会开得像绕城高速。",
       "performance": {
         "emotion": "dry_mischief",
@@ -36,22 +96,38 @@
     },
     {
       "id": "seg-003",
-      "purpose": "action",
+      "purpose": "trigger",
       "source_scene_ids": ["scene-001"],
-      "text": "不料旁边这位小龙虾 Agent 是个实在人。它不看怨气，只看标题；标题里既有周报二字，那在它眼里就等同于圣旨到。",
+      "story_function": "指出事故触发点：Agent 把标题当任务，把语境丢了。",
+      "text": "不料旁边这位小龙虾 Agent 是个实在人。它一寻思：标题里有周报，那不就是让我发吗？它不看怨气，只看标题；标题里既有周报二字，那在它眼里就等同于圣旨到。",
+      "comedy_design": {
+        "mechanism": "daily_mismatch",
+        "fact_anchor": "Agent 识别到标题里的“周报”并按任务执行。",
+        "setup_expectation": "人类会理解这只是吐槽草稿，不该发送。",
+        "punch_or_turn": "Agent 把标题当命令，把周报二字看成圣旨。",
+        "boundary_note": "原创虚构场景，无真人动机风险。"
+      },
       "performance": {
         "emotion": "mock_grand",
         "pace": "medium_slow",
         "pause_after_ms": 420,
         "emphasis": ["实在人", "周报二字", "圣旨到"],
-        "sfx_after": ["waking_block_light"]
+        "sfx_after": ["waking_block"]
       }
     },
     {
       "id": "seg-004",
-      "purpose": "release",
+      "purpose": "complication",
       "source_scene_ids": ["scene-001"],
+      "story_function": "把任务完成反转成事故完成，推高公开后果。",
       "text": "只见屏幕上唰唰唰三下排版，叮的一声，全员群里多了一份正式周报。小赵那杯咖啡举在半空，热气都吓得拐了个弯。",
+      "comedy_design": {
+        "mechanism": "micro_action",
+        "fact_anchor": "Agent 自动排版并发送，咖啡停在半空。",
+        "setup_expectation": "发送成功本来代表任务完成。",
+        "punch_or_turn": "任务完成变成事故完成，连咖啡热气都被吓出动作。",
+        "boundary_note": "夸张只作用于虚构物件，不改变事实链。"
+      },
       "performance": {
         "emotion": "comic_alarm",
         "pace": "quick",
@@ -62,15 +138,23 @@
     },
     {
       "id": "seg-005",
-      "purpose": "hook",
+      "purpose": "resolution",
       "source_scene_ids": ["scene-001"],
+      "story_function": "用老板的问号完成压力落点，收住自动化误读的笑点。",
       "text": "群里沉默七秒。七秒之后，老板回了一个问号。列位，一个问号不可怕，可怕的是它后头，没跟表情包。",
+      "comedy_design": {
+        "mechanism": "rule_of_three",
+        "fact_anchor": "群里沉默七秒，老板只回了一个问号。",
+        "setup_expectation": "问号只是简单疑问。",
+        "punch_or_turn": "没有表情包的问号变成更重的职场压力。",
+        "boundary_note": "职场压力是喜剧化解读，来源是虚构反应。"
+      },
       "performance": {
         "emotion": "suspense_joke",
         "pace": "medium_slow",
         "pause_after_ms": 600,
         "emphasis": ["七秒", "一个问号", "没跟表情包"],
-        "sfx_after": ["waking_block_light"]
+        "sfx_after": ["waking_block"]
       }
     }
   ],

@@ -1,48 +1,60 @@
-# Pingshu Tradition Reference
+# 评书传统参考
 
-## Use This When
+## 什么时候读
 
-Read this before writing public-facing scripts, defining a storyteller persona, or adapting a serious traditional source.
+写公开发布脚本、定义说书人 persona、改编严肃传统素材前，先读这份。
 
-## Practical Summary
+## 实用摘要
 
-Pingshu is a solo spoken narrative art. Its force comes from scene construction, suspense, narrator authority, vivid character treatment, sound, gesture, and audience timing. It is not a generic "old northern accent" preset.
+评书是一门单人口头叙事艺术。它的力量来自场景结构、悬念、说书人权威、人物刻画、声音、动作和观众时机。它不是一个“老年北方口音”预设。
 
-## Craft Elements To Preserve
+## 单人表演原则
 
-- **One-mouth many-roles**: one storyteller holds narrator, characters, sound, and commentary.
-- **Simple prop imagination**: fan, table, or waking block can suggest weapons, horses, doors, weather, authority, or comic punctuation.
-- **Opening and closing discipline**: begin with orientation, end with hook or turn.
-- **Scene-before-summary**: dramatize a decisive moment instead of summarizing everything evenly.
-- **Narrator judgment**: the storyteller can praise, tease, warn, or puncture grandiosity.
-- **Suspense as structure**: delay action, withhold consequence, and release at the right beat.
+把整段节目当成一个说书人在撑场。即使出现人物对白，声音也仍然属于同一个说书人的身体和音色。角色变化来自措辞、眼神感、压力、速度、音高细微变化、停顿和旁白态度。
 
-## Useful Traditional Terms
+对 TTS 来说，这意味着：
 
-These are working labels for agents, not a claim of exhaustive scholarship.
+- 不给不同角色分配不同音色。
+- 不在不同段落切换说书人 persona。
+- 不让 `emotion` 控制暗中变成年龄、性别或另一个说话人。
+- 如果分段渲染，每段使用同一个 reference/prompt voice 和同一个 voice-control anchor。
+- 如果模型分段后音色漂移，短篇优先单次渲染，或要求稳定且有授权的参考声音。
 
-| Term | Working use in the Skill |
+## 要保留的手艺元素
+
+- **一口多角**：一个说书人同时承担旁白、人物、声音和评论。
+- **小道具大想象**：折扇、桌子、醒木可以提示兵器、马、门、天气、权威或包袱点。
+- **开合有规矩**：开头要交代听众怎么入场，结尾要有钩子或回扣。
+- **先场景，后总结**：关键时刻要演出来，不要平均概括。
+- **说书人判断**：说书人可以夸、逗、提醒，也可以拆掉角色的架子。
+- **悬念是结构**：延迟动作、暂不交代后果，在合适时机释放。
+
+## 常用传统术语
+
+这些是给 Agent 使用的工作标签，不是完整学术定义。
+
+| 术语 | 在 Skill 里的用法 |
 | --- | --- |
-| 开书 | Opening orientation and invitation to listen |
-| 书梁子 | The story skeleton or episode spine |
-| 回目 | Episode title or chapter-like hook |
-| 关子 | Suspense point or cliffhanger |
-| 拨口 | Transition from one scene or thread to another |
-| 赋 / 赞 | Elevated descriptive or praising passage |
-| 口技 / 拟声 | Vocal sound effect and imitation |
-| 包袱 | Comic payload or delayed release |
+| 开书 | 开场定位，邀请听众入场 |
+| 书梁子 | 故事骨架或一回书的主梁 |
+| 回目 | 类似章节标题的钩子 |
+| 关子 | 悬念点或断口 |
+| 拨口 | 从一个场景/线索转到另一个 |
+| 赋 / 赞 | 抬高描写或赞语段 |
+| 口技 / 拟声 | 声音效果和模拟 |
+| 包袱 | 延迟释放的喜剧点 |
 
-## Respect Rules
+## 尊重规则
 
-- Use "pingshu-style" or "评书化改编" unless the work is actually performed by a trained artist.
-- Do not imply the Skill can replace traditional performers.
-- Do not copy a known performer's signature routine, catchphrase chain, or voice.
-- Do not make regional speech a joke by itself.
-- When adapting classics, do not erase the source's moral stakes just to chase jokes.
+- 除非真是受训艺人演出，否则使用“评书风格”或“评书化改编”。
+- 不暗示 Skill 可以替代传统艺人。
+- 不复制某个在世艺人的标志性套路、口头禅链条或声音。
+- 不把地域口音本身当笑话。
+- 改编经典时，不为了追求笑点抹掉原作的道德重量。
 
-## Dialect Restraint
+## 方言克制
 
-Use a few stable markers:
+可以使用少量稳定标记：
 
 - 列位
 - 您猜怎么着
@@ -52,6 +64,9 @@ Use a few stable markers:
 - 这主儿
 - 单表
 - 话说回来
+- 得嘞
+- 好家伙
+- 您琢磨
+- 这玩意儿
 
-Avoid writing every sentence in eye-dialect. Rhythm, structure, and timing matter more than spelling.
-
+不要每句话都写成方言谐音。节奏、结构和时机比拼写更重要。

@@ -11,6 +11,51 @@ const providers = {
       "Use a provider-defined voice; do not assume custom voice cloning."
     ]
   },
+  qwen: {
+    mode: "api",
+    required_env: ["QWEN_TTS_API_KEY"],
+    alternative_env: ["DASHSCOPE_API_KEY"],
+    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen",
+    notes: [
+      "Use Qwen3-TTS-Instruct-Flash through Alibaba Cloud Model Studio / DashScope.",
+      "Use one supported system voice for the whole program and insert pauses in post-processing."
+    ]
+  },
+  "qwen-voiceclone": {
+    mode: "api",
+    required_env: ["QWEN_TTS_API_KEY"],
+    alternative_env: ["DASHSCOPE_API_KEY"],
+    reference_voice_required: true,
+    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen-voiceclone --reference-wav <original_or_licensed_voice.wav> --phrase-chunks",
+    notes: [
+      "Use Alibaba Cloud Model Studio voice enrollment to create or reuse a Qwen voice clone id.",
+      "Prefer QWEN_TTS_VOICE_ID or --qwen-voice-id after the first successful enrollment.",
+      "Keep target text clean; use phrase-level post-processing for pauses."
+    ]
+  },
+  "xiaomi-mimo": {
+    mode: "api",
+    required_env: ["XIAOMI_MIMO_API_KEY"],
+    alternative_env: ["MIMO_API_KEY"],
+    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo",
+    notes: [
+      "Use MiMo V2.5 TTS / voice design through Xiaomi's official chat completions endpoint.",
+      "Prefer segmented rendering for long pingshu scripts, then insert real silence and concatenate.",
+      "Evaluate voice design outputs for timbre drift when rendering split segments."
+    ]
+  },
+  "xiaomi-mimo-voiceclone": {
+    mode: "api",
+    required_env: ["XIAOMI_MIMO_API_KEY"],
+    alternative_env: ["MIMO_API_KEY"],
+    reference_voice_required: true,
+    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo-voiceclone --reference-wav <original_or_licensed_voice.wav> --request-delay-ms 15000",
+    notes: [
+      "Use MiMo V2.5 TTS voice clone with an original/licensed reference wav.",
+      "Put voice/performance instructions in the user message, not in the assistant text.",
+      "Use conservative request pacing; this endpoint may return 429 when rendering many chunks quickly."
+    ]
+  },
   "aliyun-cosyvoice": {
     mode: "api",
     required_env: ["DASHSCOPE_API_KEY"],
@@ -35,50 +80,27 @@ const providers = {
       "Do not use cloned voices without explicit consent."
     ]
   },
-  "local-cosyvoice": {
-    mode: "local",
-    required_env: [],
-    command_hint: "python -m cosyvoice.cli --input <segments.json> --output <out_dir>",
-    notes: [
-      "Install and verify the local CosyVoice environment separately.",
-      "GPU and model paths vary by machine."
-    ]
-  },
   "local-voxcpm2": {
     mode: "local",
     required_env: [],
-    command_hint: "python pingshu-storyteller/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir> --segment-performance --pace-tempo",
+    command_hint: "python pingshu-storyteller/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir> --segment-performance --pace-tempo --reference-wav <original_or_licensed_voice.wav>",
     notes: [
       "Install VoxCPM2 in a Python 3.10-3.12 environment with torch and torchaudio.",
       "Use an original voice-control prompt or consented reference audio; do not clone a real performer without permission.",
-      "The bundled renderer splits by performance_plan segments, can pass segment pace/emotion/emphasis into voice control, and can add light tempo variation by pace."
+      "The bundled renderer can render event-level say/pause plans, insert real silence for pause events, add light tempo variation by pace, and insert sparse waking block SFX from assets/sfx.",
+      "Use the same original or licensed reference/prompt voice for all split renders to reduce timbre drift."
     ]
   },
-  "gpt-sovits": {
+  "local-qwen3-tts": {
     mode: "local",
     required_env: [],
-    command_hint: "python inference_cli.py --input <segments.json> --output <out_dir>",
+    reference_voice_required: true,
+    command_hint: "python pingshu-storyteller/scripts/render_qwen3_tts_plan.py <performance_plan.json> <out_dir> --reference-wav <original_or_licensed_voice.wav>",
     notes: [
-      "Install GPT-SoVITS separately and provide licensed reference audio.",
-      "Command names vary by release; treat this as a scaffold."
-    ]
-  },
-  "f5-tts": {
-    mode: "local",
-    required_env: [],
-    command_hint: "python -m f5_tts.infer --input <segments.json> --output <out_dir>",
-    notes: [
-      "Install F5-TTS separately and verify model/license choices.",
-      "Use clean reference audio only when the user has rights."
-    ]
-  },
-  indextts: {
-    mode: "local",
-    required_env: [],
-    command_hint: "python -m indextts.infer --input <segments.json> --output <out_dir>",
-    notes: [
-      "Install IndexTTS separately and verify Chinese voice quality.",
-      "Command names vary by release; treat this as a scaffold."
+      "Install qwen-tts in .venv-qwen3-tts or set PINGSHU_QWEN3_TTS_PYTHON.",
+      "Use Qwen3-TTS Base for local reference-audio voice clone rendering.",
+      "Provide the transcript for the reference wav when possible; x-vector-only mode is a lower-fidelity fallback.",
+      "The bundled renderer can download the model into the Hugging Face cache, insert real silence between plan segments, and insert sparse waking block SFX from assets/sfx."
     ]
   }
 };
@@ -110,6 +132,8 @@ const job = {
   mode: provider.mode,
   title: plan.title || "Untitled pingshu",
   required_env: provider.required_env,
+  alternative_env: provider.alternative_env || [],
+  reference_voice_required: provider.reference_voice_required || false,
   command_hint: provider.command_hint || null,
   voice: plan.voice || {},
   segments: plan.segments.map((segment, index) => ({
@@ -118,6 +142,18 @@ const job = {
     pace: segment.pace || "medium_slow",
     emotion: segment.emotion || "warm_mischief",
     pause_after_ms: segment.pause_after_ms ?? 300,
+    ...(Array.isArray(segment.events)
+      ? {
+          events: segment.events.map((event) => ({
+            type: event.type || "say",
+            text: event.text,
+            ms: event.ms ?? event.duration_ms,
+            reason: event.reason,
+            tempo: event.tempo,
+            emphasis: Array.isArray(event.emphasis) ? event.emphasis : undefined
+          }))
+        }
+      : {}),
     emphasis: Array.isArray(segment.emphasis) ? segment.emphasis : [],
     sfx_after: Array.isArray(segment.sfx_after) ? segment.sfx_after : [],
     output_file: `${String(index + 1).padStart(3, "0")}-${segment.id || "segment"}.wav`
@@ -125,10 +161,22 @@ const job = {
   post_process: {
     insert_pauses: true,
     add_sfx_after_segments: true,
+    sfx_assets_dir: "pingshu-storyteller/assets/sfx",
+    prop_sfx_policy: plan.audio_bed?.prop_sfx_policy || {
+      allowed_ids: ["waking_block"],
+      insert_mode: "post_tts_timeline",
+      short_episode_max_hits: 2,
+      minimum_gap_sec: 45,
+      default_gain_db: -6,
+      post_sfx_pause_ms: 420,
+      post_sfx_pause_min_ms: 320,
+      post_sfx_pause_max_ms: 650
+    },
     keep_music_below_speech: true
   },
   notes: [
     ...provider.notes,
+    "Treat sfx_after as post-processing only. Do not include waking block labels or sound-effect directions in target TTS text.",
     "This job scaffold does not call the provider. The host agent should render using the user's chosen credentials or local installation.",
     "Keep source and voice rights evidence with the rendered output."
   ]

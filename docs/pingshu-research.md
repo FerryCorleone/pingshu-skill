@@ -1,93 +1,128 @@
-# Pingshu Research Notes
+# 评书研究笔记
 
-## Scope Lock
+## 范围
 
-- Domain: Chinese pingshu and adjacent spoken narrative arts.
-- Geography: China, with emphasis on Beijing/Tianjin/North China flavor because the product idea depends on a northern pingshu-like register.
-- Lens: tradition-aware creative technology, not academic completeness.
-- User goal: create an Agent Skill that adapts modern stories into respectful, funny, listenable pingshu-style audio.
+- 领域：中国评书及相邻的口头叙事艺术。
+- 地域：以北京、天津、华北一带的北方说书口吻为重点，因为当前产品方向依赖这种听感。
+- 视角：面向创作技术和 Agent 工作流，不追求学术穷尽。
+- 用户目标：做一个 Agent Skill，把现代故事改成尊重传统、好笑、好听的评书化音频。
 
-## One-Sentence Essence
+## 一句话理解
 
-Pingshu is not just "old-timey narration"; it is a solo narrative performance craft that turns sparse plot into vivid scenes through structure, suspense, rhythm, gesture, voice, commentary, and audience-oriented timing.
+评书不是“老派念稿”。它是一门单人口头表演手艺：用结构、悬念、节奏、动作、声音、评价和观众时机，把稀疏剧情讲成生动场景。
 
-## What Must Be Respected
+## 现代样本研究原则
 
-1. **Solo performance craft**
-   Pingshu is traditionally performed by one speaker who uses language, voice, expression, gesture, and simple props such as a fan or gavel-like block to create an entire story world.
+项目早期参考过若干公开的现代说书/评书化内容，用来观察“传统口头叙事如何讲现代动漫、综艺和热点”。这些研究只沉淀为可迁移的方法论，不在公开仓库里保留具体下载媒体、完整转录、平台登录态、内部路径或可识别的私人样本清单。
 
-2. **Structure over catchphrases**
-   The form depends on openings, episode structure, suspense, scene entry, character introduction, action expansion, "guan zi" cliffhangers, and callbacks. Catchphrases alone create a cheap imitation.
+更深入的公开摘要见 `docs/style-study.md`。评书、相声、脱口秀融合方法见 `docs/comedy-method-synthesis.md`。给 Agent 写稿时直接用的方法卡在 `pingshu-storyteller/references/modern-pingshu-method-cards.md`。
 
-3. **Moral and aesthetic posture**
-   Traditional pingshu often carries judgment: loyalty, cunning, face, honor, absurdity, consequences. Modern adaptation can be comic, but should not become contempt for the source or the tradition.
+可长期复用的发现：
 
-4. **Respect for artists**
-   Do not clone or imitate a living artist's recognizable voice, cadence, verbal trademarks, or persona without permission. Build original storyteller personas.
+1. **必须是单人表演。**
+   样本明确是一个演播者。人物区别靠措辞、节奏、压力、短促语气词和模拟对白，不靠换音色。任何 TTS 链路只要分段换了音色质感，就不符合目标。
 
-5. **Dialect with restraint**
-   Northern flavor should come from rhythm, sentence shape, and a few idiomatic particles. Overstuffed dialect spelling becomes caricature and harms intelligibility.
+2. **目标是土味鲜活，不是古董腔。**
+   我们要的是北方口头表演感：直接、稍糙、会调侃、偶尔有点家常粗口，但表达清楚。不是泛化的老年播音腔、朝堂说书腔或 AI 纪录片腔。
 
-## Core Techniques To Model
+3. **现代密度优先于套话。**
+   样本很少依赖冗长开场，而是一直推具体动作：谁动了、谁看见了、什么东西易手、后果是什么。评书味来自时机和态度，不来自堆 `列位看官`。
 
-| Technique | What it does | Skill implication |
+4. **动作被拆成微镜头。**
+   一个打斗段落会被拆成一串小操作：识破、掏家伙、追、扔、躲、打、揭示机关，再加一句生活化旁白。这是动漫、综艺、社会事件都能复用的核心改编动作。
+
+5. **笑点先有逻辑，再有语言。**
+   常见机制是：先设一个普通规则，让人物过度认真或过度离谱地执行，再由说书人拆台。比如“答得太对反而可疑”，好笑是因为逻辑本身成立。
+
+6. **节奏变化是结构，不是装饰。**
+   17:13 样本在关闭长上下文幻觉后得到 493 个短 ASR 段，中位段长约 1.9 秒，p90 约 3.38 秒。快窗口约 3.8-4.2 字/秒，慢或悬念窗口约 1.8-2.4 字/秒。其他样本也类似：动作段、喜剧段、解释段速度不同。系统应该规划短句爆发、压住悬念和释放包袱，而不是给整段一个统一语速。
+
+7. **方言是调料。**
+   可用的北方标记包括 `得嘞`、`甭管`、`这玩意儿`、`好家伙`、`您琢磨`、`这主儿`，以及 `这事儿坏就坏在...` 这类句式。它们不能盖过事实。
+
+8. **默认不做声音克隆。**
+   任何在世表演者都不应该被当作默认克隆对象。产品可以学习公开样本里的结构手艺，但应该使用原创或合法授权声音。可以做“稍带北方口吻、略粗粝、单人说书人”的原创声音，不可以暗示模仿某个具体艺人的音色。
+
+## 必须尊重的东西
+
+1. **单人表演手艺**
+   评书通常由一个人用语言、声音、表情、动作和醒木/折扇等简单道具撑起整个故事世界。
+
+2. **结构大于口头禅**
+   形式依赖开书、书梁子、关子、拨口、人物亮相、动作展开和回扣。只有口头禅会变成廉价模仿。
+
+3. **态度和判断**
+   传统评书经常带判断：忠义、机巧、面子、荒唐、后果。现代改编可以好笑，但不能为了搞笑把原作和传统都踩扁。
+
+4. **尊重艺人**
+   未经允许，不克隆、不模仿在世艺人的可识别声音、节奏、固定话术和人格化风格。
+
+5. **方言克制**
+   北方味主要来自节奏、句式和少量惯用词。到处写方言谐音会变成漫画化，反而难听。
+
+## 要建模的核心技法
+
+| 技法 | 作用 | 对 Skill 的要求 |
 | --- | --- | --- |
-| Kai shu opening | Establishes storyteller authority and audience relationship | Begin with a concise opening, not an info dump |
-| Liang zi / story skeleton | Keeps the long arc coherent | Build a story pack before writing prose |
-| Guan zi | Suspense hook at a turn or ending | Every segment needs a hook or turn |
-| Bo kou | Smooth transition between scenes | Insert bridge lines when changing time/place/character |
-| Fu / zan | Elevated descriptive passage or praise | Use sparingly for action, character entrance, or comic grandeur |
-| Xue / Kouji | Mimicry and sound effects | Mark in performance plan instead of forcing TTS to infer |
-| Banter / aside | Lets narrator comment on action | Use for humor, but preserve facts |
-| Rhythmic delay | Makes small actions feel consequential | Expand important beats with setup, pause, and release |
+| 开书 | 建立说书人和听众关系 | 开头要短，直接给场面或矛盾 |
+| 书梁子 | 保持长故事骨架 | 先做 `story_pack`，再写正文 |
+| 关子 | 在转折或结尾留悬念 | 每段要有钩子或变化 |
+| 拨口 | 从一条线转到另一条线 | 场景切换要有桥 |
+| 赋/赞 | 抬高人物或动作 | 只在入场、动作和反差处少量使用 |
+| 口技/拟声 | 模拟声音和动作 | 写进表演计划，不强迫 TTS 猜 |
+| 旁白拆台 | 让说书人评价现场 | 用来制造笑点，但不能遮住事实 |
+| 延迟释放 | 让小动作有分量 | 重要段落要铺、停、放 |
 
-## Adapting Modern Material
+## 适合改编的现代素材
 
-Modern content that works well:
+适合：
 
-- public-domain fiction chapters,
-- user-owned stories,
-- public events summarized from reliable sources,
-- interviews or talk-show moments with clear conflict,
-- animated or drama scenes when used as critique, commentary, parody, or summary with care.
+- 公版小说章节；
+- 用户自己拥有或授权的故事；
+- 有可靠来源的公共事件；
+- 有明确冲突的采访、综艺、谈话片段；
+- 以评论、总结、戏仿、解读方式处理的动漫/剧集场景。
 
-Weak material:
+不适合：
 
-- pure plot summary with no scene detail,
-- gossip without reliable sourcing,
-- scenes that depend entirely on visual choreography but have no available description,
-- copyrighted recaps copied from a single creator.
+- 只有大概剧情、没有场景细节；
+- 来源不可靠的八卦；
+- 完全依赖视觉调度但没有任何可用描述的场景；
+- 直接复制某个解说博主的版权文案。
 
-## How To Make A Flat Event Vivid
+## 怎么把平淡事件讲活
 
-Do not just add "lie wei kan guan" to the beginning. Use this expansion pattern:
+不要只是在开头加“列位看官”。使用这个展开模式：
 
-1. Identify the status relation: who has face, who loses face, who surprises whom.
-2. Delay the action: show stillness before motion.
-3. Enlarge sensory detail: sound, distance, posture, eye line, object movement.
-4. Add narrator judgment: serious praise followed by comic demotion.
-5. Release with a crisp line, pause, or sound effect.
+1. 找身份关系：谁有面子，谁丢面子，谁让谁意外。
+2. 延迟动作：先写动之前的静。
+3. 放大感官细节：声音、距离、姿态、眼神、物件移动。
+4. 加说书人判断：先抬高，再生活化拆台。
+5. 用短句、停顿或音效释放。
 
-Example pattern:
+示例模式：
 
 ```text
-Raw fact: A slapped B, and B stared back.
-Pingshu move: raise stakes -> suspend the hand -> sound cue -> face reaction -> narrator aside -> next hook.
+原始事实：A 打了 B 一巴掌，B 瞪回去。
+评书化动作：抬高利害 -> 悬住手 -> 声音点 -> 写脸上反应 -> 说书人旁白 -> 下一钩子。
 ```
 
-## Ethical Boundaries
+## 伦理边界
 
-- Avoid framing traditional pingshu as a novelty filter.
-- Avoid using dialect markers to mock class, region, age, or education.
-- Avoid turning real people's distress into entertainment unless the work is clearly commentary and handled proportionately.
-- Avoid making unverified claims sound like historical narration.
+- 不把评书说成一个猎奇滤镜。
+- 不用方言标记嘲笑地域、年龄、阶层或教育水平。
+- 真实人物的痛苦不能被随意娱乐化；如果是评论，也要控制比例。
+- 没核实的事不能写得像历史定论。
 
-## High-Signal Sources
+## 高信号来源
 
-- [北京评书 - 中国非物质文化遗产网](https://www.ihchina.cn/project_details/13683.html): project no. `Ⅴ-57`, category `曲艺`, second national list, with notes on solo performance, folding fan, waking block, oral effects, "豪/紧/动/热", and structure terms such as `书梁子`, `回目`, `关子`, `拨口`, `赋`, `赞`.
-- [扬州评话 - 中国非物质文化遗产网](https://www.ihchina.cn/project_details/13585.html): useful adjacent reference for one-person spoken storytelling, dialect-specific performance, detailed description, strict structure, vivid characterization, and rich local color.
-- [中华人民共和国著作权法 - 国家版权局](https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html): use for rights review before adapting modern copyrighted works.
-- Primary texts in the public domain for early test material.
-- Licensed or user-provided transcripts for modern scenes.
+- [北京评书 - 中国非物质文化遗产网](https://www.ihchina.cn/project_details/13686.html)：项目编号 `Ⅴ-57`，曲艺类，第二批国家级名录。可参考单人表演、折扇、醒木、口技、“豪/紧/动/热”和 `书梁子`、`回目`、`关子`、`拨口`、`赋`、`赞` 等结构术语。
+- [相声 - 中国非物质文化遗产网](https://www.ihchina.cn/project_details/13669.html)：参考天津相声以说为主、以讽刺见长、火爆热烈和富于幽默感的传统。
+- [非遗中国：相声 - 新浪文化](https://culture.sina.cn/2019-03-19/detail-ihsxncvh3740693.d.html?vt=4)：参考相声的垫话、瓢把儿、正活儿、底，以及三翻四抖、误会、曲解、违反常规等包袱组织。
+- [相声科普 - 北京旅游网](https://www.visitbeijing.com.cn/article/47QoCvH5WYY)：参考包袱来自语言、事件、情节不协调，以及语气、眼神、手势、迟急顿挫的重要性。
+- [扬州评话 - 中国非物质文化遗产网](https://www.ihchina.cn/project_details/13585.html)：相邻参考，适合理解一人说演、方言性、细致描写、严整结构、人物刻画和地方色彩。
+- [中华人民共和国著作权法 - 国家版权局](https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html)：改编现代版权作品前做权利检查。
+- 公版原文适合作为早期测试材料。
+- 现代场景优先使用已授权或用户提供的字幕/转录。
 
-Current external fact checks should be refreshed before publication because provider capabilities, platform rules, and URLs change.
+外部事实、平台规则和模型能力都可能变化，发布前要重新核验。

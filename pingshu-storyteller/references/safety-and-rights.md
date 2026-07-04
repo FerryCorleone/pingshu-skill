@@ -1,49 +1,49 @@
-# Safety And Rights
+# 安全与权利边界
 
-## Voice And Persona
+## 声音和 persona
 
-- Do not clone or imitate a real living person's voice without explicit consent.
-- Do not create "sounds like [artist]" instructions for recognizable living artists.
-- Prefer original personas, such as `warm_northern_storyteller`, with invented traits.
-- Keep voice prompts short. Put drama in the script and performance plan, not in heavy TTS prompting.
+- 未经明确同意，不克隆或模仿真实在世人物的声音。
+- 不写“听起来像某某艺人/博主”的指令。
+- 优先使用原创 persona，比如 `warm_northern_storyteller`，设定为虚构说书人。
+- 声音提示要短。戏剧张力应该放在脚本和表演计划里，不要靠厚重 TTS prompt 硬压。
 
-## Copyright And Adaptation
+## 版权与改编
 
-Primary legal reference for China publishing: [中华人民共和国著作权法 - 国家版权局](https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html). In particular, adaptations, network publication, recordings, and performances can involve separate rights.
+中国发布场景的主要法律参考：[中华人民共和国著作权法 - 国家版权局](https://www.ncac.gov.cn/xxfb/flfg/flfg_532/202103/t20210309_50530.html)。改编、网络传播、录音和表演可能涉及不同权利。
 
-When adapting copyrighted works:
+改编版权作品时：
 
-- prefer summary, commentary, critique, parody, or user-licensed material,
-- avoid long verbatim dialogue,
-- avoid reproducing a whole episode/chapter substitute,
-- keep source notes,
-- warn the user when public posting may require rights review.
+- 优先做总结、评论、批评、戏仿或用户已授权素材；
+- 避免长段逐字复现对白；
+- 避免做成完整剧集/章节的替代品；
+- 保留来源记录；
+- 公开发布前提醒用户做权利检查。
 
-Public-domain classics are the safest first material, but translations, modern editions, performances, and audiobooks may still have separate rights.
+公版经典是最安全的早期素材，但现代译本、整理本、演出版和有声书仍可能有独立权利。
 
-## Real People And Current Events
+## 真人与热点事件
 
-- Separate fact from allegation.
-- Do not invent quotes.
-- Avoid demeaning private individuals.
-- For public figures, keep satire tied to public conduct and sourced facts.
+- 区分事实和指控。
+- 不编造引语。
+- 避免贬损普通私人个体。
+- 涉及公众人物时，讽刺要绑定其公开行为和有来源事实。
 
-## Platform Publishing
+## 平台发布
 
-Before publishing generated audio/video:
+发布生成音频/视频前：
 
-- confirm source rights,
-- confirm voice rights,
-- confirm music/sound effect rights,
-- keep proof of licenses or source notes,
-- avoid implying endorsement by original artists, shows, platforms, or performers.
+- 确认素材权利；
+- 确认声音权利；
+- 确认音乐和音效权利；
+- 保存许可证或来源证明；
+- 避免暗示原作者、节目、平台或表演者背书。
 
-## Red Flags
+## 红线
 
-Stop and ask for safer input when:
+遇到下面情况要停下来，要求更安全的输入：
 
-- the request asks to clone a named artist or influencer,
-- the request asks for a full copyrighted episode retold scene-by-scene,
-- the source is only one creator's recap,
-- the story is defamatory or relies on gossip,
-- the user wants to conceal AI generation or impersonation.
+- 用户要求克隆某个具名艺人或网红；
+- 用户要求把完整版权剧集逐场景复述；
+- 来源只有一个创作者的 recap；
+- 故事可能构成诽谤，或只依赖传闻；
+- 用户想隐藏 AI 生成或冒充真人。

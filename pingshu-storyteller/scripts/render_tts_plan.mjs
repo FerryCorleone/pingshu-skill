@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 function usage() {
@@ -14,6 +14,8 @@ if (!inputArg || !outputArg) usage();
 
 const inputPath = resolve(inputArg);
 const outputPath = resolve(outputArg);
+const inputDisplayPath = relative(process.cwd(), inputPath) || ".";
+const outputDisplayPath = relative(process.cwd(), outputPath) || ".";
 const script = JSON.parse(readFileSync(inputPath, "utf8"));
 
 if (!Array.isArray(script.segments) || !script.segments.length) {
@@ -28,6 +30,14 @@ const plan = {
     persona_id: voice.id || "warm_northern_storyteller",
     provider_preference: "undecided",
     consent_required: false,
+    performance_mode: voice.performance_mode || "single_performer",
+    timbre_lock: true,
+    role_voice_policy: "Same storyteller voice for narration and all characters; shift role through wording, pace, pressure, and pauses instead of separate timbres.",
+    reference_voice: {
+      required_for_split_render: "recommended",
+      path_or_id: null,
+      consent_status: "original"
+    },
     notes: voice.description || "Original storyteller persona; do not imitate a real performer."
   },
   segments: script.segments.map((segment) => {
@@ -50,15 +60,29 @@ const plan = {
       const sfx = segment.performance?.sfx_after;
       return Array.isArray(sfx) ? sfx : [];
     }))],
+    prop_sfx_policy: {
+      allowed_ids: ["waking_block"],
+      insert_mode: "post_tts_timeline",
+      short_episode_max_hits: 2,
+      minimum_gap_sec: 45,
+      default_gain_db: -6,
+      post_sfx_pause_ms: 420,
+      post_sfx_pause_min_ms: 320,
+      post_sfx_pause_max_ms: 650,
+      notes: "Use waking block cues sparingly after the spoken line; never put SFX directions in TTS text."
+    },
     loudness_note: "Speech stays primary. Insert silence or effects after TTS render if provider lacks pause control."
   },
   rendering_notes: [
-    "Render short segments separately when the provider has weak long-form prosody.",
+    "Keep one stable storyteller timbre across all segments; do not assign separate character voices.",
+    "Use single-pass only for audition. Final pingshu audio should preserve event-level pauses and pass ASR audit.",
+    "Render split segments only with the same provider voice id or the same local reference/prompt voice.",
+    "For final pingshu timing, expand important segments into events: say for spoken text and pause for real inserted silence.",
+    "Insert waking block SFX only as post-processed audio blocks from assets/sfx; do not ask TTS to say SFX labels.",
     "Prefer clean voice settings; do not stack heavy dialect, emotion, rate, and negative quality prompts.",
-    `Generated from ${inputPath} in ${dirname(outputPath)}.`
+    `Generated from ${inputDisplayPath} to ${outputDisplayPath}.`
   ]
 };
 
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`, "utf8");
 console.log(`Wrote ${outputPath}`);
-

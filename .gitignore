@@ -21,4 +21,8 @@ coverage/
 *.srt
 *.vtt
 *.zip
+*.jsonl
 runs/
+!pingshu-storyteller/assets/
+!pingshu-storyteller/assets/**/
+!pingshu-storyteller/assets/**/*.wav

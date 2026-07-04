@@ -1,4 +1,4 @@
 interface:
-  display_name: "Pingshu Storyteller"
-  short_description: "Turn sourced stories into respectful pingshu audio plans"
-  default_prompt: "Use $pingshu-storyteller to adapt this story into a sourced, respectful pingshu script and TTS performance plan."
+  display_name: "评书说书"
+  short_description: "把有来源的故事改成现代中文评书脚本和 TTS 表演计划"
+  default_prompt: "使用 $pingshu-storyteller，把这个素材改成有来源、有包袱、适合通勤听的中文评书脚本和 TTS 表演计划。"

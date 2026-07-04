@@ -1,53 +1,65 @@
-# Product Plan
+# 产品计划
 
-## Product Thesis
+## 产品判断
 
-The durable product is not a "pingshu voice filter." It is a story acquisition, dramaturgy, and performance-planning Skill that helps agents turn sourced material into funny, detailed, respectful spoken narrative.
+这个项目长期要做的不是“评书音色滤镜”，而是一套素材获取、戏剧化改编、表演计划和 TTS 渲染的 Agent Skill。它帮助 Agent 把有来源依据的素材，改成好笑、细节充分、尊重传统、适合听的中文说书内容。
 
-## MVP
+## 最小可行版本
 
-Start with a portable Skill:
+先从可移植 Skill 开始：
 
-- Input: user request plus optional source links/text/files.
-- Output: `story_pack`, `pingshu_script`, `performance_plan`, and optional plain text.
-- TTS: user-selected API or local provider.
+- 输入：用户需求，加可选的来源链接、文本或文件。
+- 输出：`story_pack`、`pingshu_script`、`performance_plan`，正式音频完成后再输出 `delivery_plan`，以及可选纯文本。
+- TTS：由用户明确选择 API 或本地模型。
+- 交付：默认给本地音频文件；如果用户想在通勤时直接用常用 App 听，再走网易云音乐云盘上传。
 
-Do not start with a native app. A Skill plus examples is easier to share, inspect, fork, and open source.
+不要一开始就做原生 App。Skill 加样例更容易分享、检查、fork 和开源，也更符合 Agent 生态的使用方式。
 
-## Best First Content
+## 最适合先做的内容
 
-1. Public-domain classics such as Journey to the West chapters.
-2. User-owned life/work stories.
-3. Public tech/AI events and software "整活" stories.
-4. Carefully sourced public interviews or talk-show moments.
+1. 《西游记》等公版经典章节。
+2. 用户自己拥有版权或愿意授权的生活、工作故事。
+3. 公开的 AI、科技、软件整活事件。
+4. 有明确来源的公开采访、综艺片段、谈话类名场面。
 
-Delay broad "any anime/drama/variety show" support until sourcing, rights checks, and clip-detail extraction are stronger.
+“任意动漫、电视剧、综艺都能讲”要晚一点再放开。它依赖更强的素材获取、版权检查和片段细节提取能力。
 
-## Content Format
+## 内容形式
 
-Short-form demo formula:
+短视频 Demo 公式：
 
-1. First 3 seconds: the finished pingshu clip.
-2. Middle: show the agent turning a flat scene into a pingshu scene card.
-3. End: invite comments for the next story and point to the Skill.
+1. 前 3 秒：直接放完成后的评书化片段。
+2. 中段：展示 Agent 如何把一个平淡场景改成评书场景卡。
+3. 结尾：邀请评论区点题，并指向 Skill。
 
-Long-form listening formula:
+长音频公式：
 
-1. Opening book title.
-2. 3-5 scene segments.
-3. One strong cliffhanger.
-4. Subtle audio bed that does not cover speech.
+1. 开书标题。
+2. 3-5 个场景段落。
+3. 一个强钩子或关子。
+4. 轻微声景或音乐垫底，但不能盖过人声。
 
-## Positioning
+## 收听交付
 
-Working title ideas:
+MVP 里先接网易云音乐云盘，而不是一上来做公开播客。
+
+原因：
+
+- 用户可以在自己常用的音乐 App 里听，更符合上下班路上的使用场景；
+- 云盘更接近私有收听，适合早期测试影视、综艺、动漫等二创改编样稿；
+- 公开播客、电台或平台推荐流会立刻遇到版权、审核和账号运营问题，不适合放进默认链路。
+
+Skill 的默认动作是本地交付。只有用户确认“要上传到网易云”后，Agent 才检查 `ncm-cli`、开放平台 API 配置和扫码登录状态。
+
+## 定位
+
+工作标题备选：
 
 - 赛博醒木
-- AI评书馆
+- AI 评书馆
 - 今日热闹书
 - Pingshu Storyteller
 
-Core promise:
+核心承诺：
 
-> Turn modern stories into sourced, funny, commute-friendly Chinese pingshu.
-
+> 把现代故事，改成有来源、有包袱、上下班路上能听的中文评书。
