@@ -1,125 +1,143 @@
-# pingshu-storyteller
+# pingshu.Skill
 
-把有来源的故事、综艺名场面、剧集片段、动漫剧情或热点事件，改成一段好听、好笑、能让人通勤路上听的中文评书音频。
+`pingshu.Skill` 是一个通用 Agent Skill，用来把有来源的故事、综艺名场面、剧集片段、动漫剧情、热点事件或个人故事，改成一段更像“现代评书”的中文音频内容。
 
-它不是一个“评书风提示词”，而是一个 Agent Skill：先帮你整理真实素材和场景细节，再写成现代评书脚本，最后生成可交给 TTS 的表演计划。用户可以选择本地开源 TTS，也可以选择云端 API。
+它不是传统评书复刻，也不是模仿某个具体艺人，而是让 Agent 用说书的方式，把现代内容讲得更有画面、更有节奏、更好笑，也更适合通勤路上听。
 
-## 这个项目有什么特色
+## 项目特点
 
-- **先讲故事，再讲风格**：不靠“列位看官”凑味儿，而是先把背景、人物、冲突、动作、反应讲清楚。
-- **保留名场面记忆点**：经典短台词、关键物件、动作和反应不能漏，比如外语短名句会保留原句，再用中文评书口吻接住。
-- **导演式写作**：每次写正文前先做 `story_design`，明确钩子、主问题、笑点引擎、节奏和结尾。
-- **娱乐优先**：传统评书味是形式，不把综艺或热点写成说教稿。
-- **TTS 中立**：脚本和表演计划不绑定某一家模型。可以走本地 VoxCPM2 / Qwen3-TTS，也可以走云端 API。
-- **单人说书**：全程同一个原创说书人音色，人物区别靠话术、节奏和停顿，不靠乱换音色。
-- **可选音效层**：内置一个醒木音效，作为后期层少量插入，不喧宾夺主。
-- **交付闭环**：生成音频后，默认交付本地文件；用户确认后可尝试上传到网易云音乐云盘。
+- **现代内容评书化**：适合综艺、剧集、动漫、采访、热点和用户自己的故事。
+- **先有素材，再写故事**：要求 Agent 先确认来源和剧情细节，不鼓励凭空编。
+- **更重视好听好笑**：保留评书的节奏、开场、停顿、醒木和单人表演感，但不把文本写成老派套话。
+- **自带默认人声**：内置一段原创中老年北方说书人参考音源，减少“AI 主播味”。
+- **自带 TTS 选择建议**：支持本地模型，也支持 API TTS；用户可以按电脑配置和成本选择。
+- **可生成完整音频**：脚本、表演计划、TTS 合成、醒木音效和音频交付都放在同一个 Skill 里。
 
 ## 适合谁
 
-适合：
+- 想把喜欢的名场面做成通勤音频的人；
+- 想用 Agent 做内容改编和音频创作的人；
+- 想研究“传统说书形式 + 现代内容 + AI TTS”的开发者和创作者。
 
-- 想把喜欢的剧集、综艺、动漫或热点讲成有趣音频的人；
-- 想研究“Agent 如何先找素材、再创作、再合成音频”的开发者；
-- 想把传统评书表达和现代内容结合起来的创作者。
+## 怎么安装
 
-不适合：
+这个项目是一个通用 Skill，不绑定某一个 Agent 产品。安装方式取决于你使用的 Agent 是否支持本地 Skill。
 
-- 直接洗稿其他解说博主；
-- 克隆某位在世艺人的声音；
-- 在没有版权或授权的情况下公开发布完整影视/综艺复刻内容；
-- 只给一句“随便讲讲”，却要求事实完全准确。
+通常流程是：
 
-## 安装
-
-### 1. 克隆仓库
+1. 下载仓库：
 
 ```bash
 git clone https://github.com/FerryCorleone/pingshu-storyteller.git
 cd pingshu-storyteller
 ```
 
-### 2. 安装到 Codex Skills
+2. 把 `pingshu-storyteller/` 这个目录复制或链接到你的 Agent 的 Skills 目录。
 
-如果你使用 Codex，可以把 Skill 目录链接到本机 Skills 目录：
+3. 重新启动或刷新 Agent，让它重新加载本地 Skills。
 
-```bash
-mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
-ln -sfn "$(pwd)/pingshu-storyteller" "${CODEX_HOME:-$HOME/.codex}/skills/pingshu-storyteller"
-```
-
-重启或刷新 Codex 后，就可以在对话里说：
+4. 在对话里这样使用：
 
 ```text
-使用 pingshu-storyteller，把这个片段改成一段 3 分钟左右的现代评书音频。
+使用 pingshu.Skill，把这个片段改成一段 3 分钟左右的现代评书音频。
 ```
 
-其他 Agent 平台也可以用同样思路：把 `pingshu-storyteller/` 复制或链接到该平台的 Skill 目录即可。
+如果你的 Agent 没有 Skill 目录，也可以让它直接读取 `pingshu-storyteller/SKILL.md`，再按里面的工作流执行。
 
-### 3. 运行校验
+## 需要准备什么
 
-需要 Node.js 18 或更高版本。
+### 基础环境
+
+- Node.js 18 或更高版本；
+- 一个支持读取本地 Skill 的 Agent；
+- 如果要生成音频，还需要配置本地 TTS 模型或 API TTS；
+- 如果想把音频同步到常用播放器，可以额外配置网易云音乐开放平台/API key，用来上传到网易云音乐云盘。
+
+可以先跑一次结构校验：
 
 ```bash
 node pingshu-storyteller/scripts/validate_skill_outputs.mjs examples
 ```
 
-如果你本机也安装了 Codex 的 `skill-creator`，还可以运行：
+### 默认人声
 
-```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" pingshu-storyteller
+`pingshu.Skill` 内置一段默认参考人声：
+
+```text
+pingshu-storyteller/assets/voice/default_storyteller_c06.wav
 ```
 
-## 一次完整流程是什么样
+这是一段原创生成的中老年北方说书人音源，不是真实艺人克隆。默认情况下，本地 VoxCPM2 / Qwen3-TTS 会直接使用它；API voice clone 路线只有在用户选择服务商并确认上传条款后才会使用它。
 
-1. **确认目标**：用户告诉 Agent 想听什么内容，例如某个综艺名场面、剧集片段或热点事件。
-2. **找素材**：Agent 先整理来源，必要时搜索、读取用户给的链接、用 ASR 转录，生成 `story_pack.json`。
-3. **做导演方案**：Agent 先设计完整故事结构、标题、笑点、节奏和关键场面，生成 `pingshu_script.json`。
-4. **写评书正文**：正文按场景时间线推进，加入少量北方口吻、内心戏、捧逗、醒木式转折等技巧。
-5. **生成表演计划**：Agent 把正文拆成 `say` 和 `pause` 事件，生成 `performance_plan.json`。
-6. **选择 TTS**：用户选择本地模型或云端 API。没有配置前，Agent 不应该静默用系统语音糊弄。
-7. **渲染音频**：TTS 只念正文，停顿和醒木音效由后期插入。
-8. **回检与交付**：正式音频完成后做 ASR 回检，再交付本地文件；用户确认后才上传网易云。
+如果你不想用默认音色，可以告诉 Agent 想改成什么方向，比如更年轻、更沉稳、更天津口一点，或者更像有声书。Agent 会基于这个方向重新做短样试听。
 
-## 本地 TTS 怎么选
+### 本地 TTS 怎么选
 
-本项目默认推荐两档：
+如果你希望不走云端 API，在自己电脑上生成音频，推荐只考虑两个档位：
 
-| 方案 | 定位 | Mac 建议 | Windows/Linux 建议 |
+| 方案 | 适合谁 | Mac 建议 | Windows / Linux 建议 |
 | --- | --- | --- | --- |
-| VoxCPM2 | 高质量默认档 | Apple Silicon + 32GB 统一内存起步，48GB 以上更稳 | NVIDIA 12GB VRAM + 32GB RAM 起步，16GB VRAM / 64GB RAM 更稳 |
-| Qwen3-TTS 0.6B | 低配兜底档 | Apple Silicon + 16GB 统一内存起步，24-32GB 更稳 | NVIDIA 8GB VRAM + 16GB RAM 起步，32GB RAM 更稳 |
+| VoxCPM2 | 效果优先，默认推荐 | Apple Silicon + 32GB 统一内存起步，48GB 以上更稳 | NVIDIA 12GB VRAM + 32GB RAM 起步，16GB VRAM / 64GB RAM 更稳 |
+| Qwen3-TTS 0.6B | 机器配置较低，想先跑通 | Apple Silicon + 16GB 统一内存起步，24-32GB 更稳 | NVIDIA 8GB VRAM + 16GB RAM 起步，32GB RAM 更稳 |
 
-设备更低时，建议直接走云端 API。
-
-先运行：
+推荐先让 Agent 运行：
 
 ```bash
 node pingshu-storyteller/scripts/check_local_tts_device.mjs
 ```
 
-## 目录结构
+如果检测结果暂时不适合本地跑，也没关系，先走 API TTS 会更省心。等以后换机器、加显卡，或者有云 GPU 环境，再回来折腾本地模型也完全可以。
+
+### API TTS 推荐用什么
+
+当前主要推荐两条 API 路线：
+
+- **小米 MiMo V2.5 TTS**：适合先跑通和快速试效果。它现在官网侧相对友好，适合爱好者低成本尝试。
+- **千问/Qwen TTS**：适合作为长期备选。中文效果和稳定性不错，价格也比较适合持续生成内容。
+
+使用 API 时，只需要准备对应平台的 API key。为了安全，最好把 key 配在本机环境变量或 Agent 的安全凭据里，不要发到公开仓库、Issue 或聊天截图里。
+
+### 网易云音乐云盘
+
+如果你希望生成完音频后，直接在手机里的网易云音乐打开收听，可以配置网易云音乐开放平台/API key。
+
+配置完成后，Agent 可以在用户确认后把生成的音频上传到网易云音乐云盘。这样音频不只停留在本地文件夹里，上下班路上也能直接从网易云音乐里听。
+
+## 使用时怎么说更清楚
 
 ```text
-pingshu-storyteller/
-  SKILL.md                 # Skill 入口，给 Agent 读
-  references/              # 详细方法、TTS、版权、交付规则
-  scripts/                 # 校验、TTS、网易云上传等辅助脚本
-  assets/sfx/              # 内置醒木音效
-docs/                      # 面向开发者和小白用户的说明
-examples/                  # 示例 story/script/performance/delivery 产物
-REPORT.md                  # 开源说明报告
-ASSETS.md                  # 音效和第三方资产说明
-LICENSE                    # 开源许可证
+使用 pingshu.Skill，把《绝命毒师》Say my name 这个名场面做成 3 分钟以内的现代评书音频。请保留关键短台词，风格好玩一点，不要说教。TTS 用本地 VoxCPM2。
+```
+
+也可以换成 API：
+
+```text
+使用 pingshu.Skill，把这个综艺片段做成 2 分钟现代评书音频。TTS 用小米 MiMo。如果音频生成后可以上传网易云云盘，你先引导我配置需要的 API key 和登录。
 ```
 
 ## 注意事项
 
-- 这个项目会帮助你“转述、评论、戏仿、解读”内容，但不替你解决所有版权问题。
-- 不要把其他创作者的解说稿拿来直接改写发布。
-- 不要用它克隆在世艺人或普通人的声音，除非你有明确授权。
-- API key、private key、cookie、token 不要写进任何 JSON、日志或聊天记录。
-- 网易云上传只建议用于用户自己的音乐云盘或私有收听场景；公开发布前请确认权利边界和平台规则。
+- 讲已有作品或热点时，尽量提供链接、字幕、时间戳或剧情来源。
+- 不要让 Agent 直接改写别人的完整解说稿。
+- 不要克隆在世艺人、主播、明星或普通人的声音，除非你有明确授权。
+- 生成内容用于公开发布前，请自己确认版权和平台规则。
+- 网易云音乐云盘上传适合个人收听；公开发布到电台、播客或平台推荐频道前，要额外确认权利边界。
+
+## 目录里有什么
+
+```text
+pingshu-storyteller/
+  SKILL.md                 # Agent 读取的 Skill 入口
+  references/              # 写作、TTS、版权、交付规则
+  scripts/                 # 校验、设备检测、TTS、上传辅助脚本
+  assets/voice/            # 内置默认说书人参考音源
+  assets/sfx/              # 内置醒木音效
+examples/                  # 示例产物
+docs/                      # 项目研究和设计文档
+ASSETS.md                  # 资产和第三方说明
+REPORT.md                  # 开源说明报告
+LICENSE                    # MIT 许可证
+```
 
 ## 开发者校验
 
@@ -131,4 +149,4 @@ node pingshu-storyteller/scripts/lint_pingshu_quality.mjs examples/story_pack.js
 
 ## 许可证
 
-代码和文档使用 MIT License。内置音效和第三方模型/服务有各自的许可和使用边界，见 [ASSETS.md](./ASSETS.md)。
+代码和文档使用 MIT License。内置音效、内置默认人声、TTS 模型和云服务各自有独立许可和使用条款，使用前请看 [ASSETS.md](./ASSETS.md) 并自行确认。

@@ -27,9 +27,10 @@ from local_tts_rendering import (
 
 
 DEFAULT_MODEL = "Qwen/Qwen3-TTS-12Hz-0.6B-Base"
+DEFAULT_VOICE_ID = "pingshu_default_storyteller_c06"
 DEFAULT_REF_TEXT = (
-    "列位，今儿咱慢慢说。肯德基门口这只箱子，装的是金条，也是信任。"
-    "您把耳朵支棱起来，后头这一下，有意思。"
+    "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，"
+    "也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。"
 )
 
 
@@ -43,8 +44,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cache-dir", default=".cache/huggingface", help="Hugging Face cache directory")
     parser.add_argument("--device", default="auto", help="auto, mps, cpu, cuda, cuda:0")
     parser.add_argument("--dtype", default="float32", choices=["float32", "bfloat16", "float16"])
-    parser.add_argument("--reference-wav", required=True, help="Original/licensed reference wav for Base voice clone")
-    parser.add_argument("--reference-text", default=DEFAULT_REF_TEXT, help="Transcript of --reference-wav")
+    parser.add_argument("--reference-wav", help="Original/licensed reference wav for Base voice clone")
+    parser.add_argument("--reference-text", help="Transcript of --reference-wav")
     parser.add_argument("--language", default="Auto", help="Qwen3-TTS language label")
     parser.add_argument("--x-vector-only-mode", action="store_true", help="Use speaker embedding only; lower clone fidelity")
     parser.add_argument("--non-streaming-mode", action="store_true", help="Use Qwen3-TTS non_streaming_mode=True")
@@ -79,6 +80,100 @@ def resolve_device(value: str) -> str:
     return "cpu"
 
 
+def skill_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def default_voice_manifest_path() -> Path:
+    return skill_root() / "assets" / "voice" / "manifest.json"
+
+
+def resolve_local_path(value: str | None) -> Path | None:
+    if not value:
+        return None
+    path = Path(value).expanduser()
+    if path.is_absolute():
+        return path
+    candidates = [
+        Path.cwd() / path,
+        skill_root() / path,
+        repo_root() / path,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate.resolve()
+    return (Path.cwd() / path).resolve()
+
+
+def default_voice_asset() -> dict:
+    manifest_path = default_voice_manifest_path()
+    if not manifest_path.exists():
+        return {
+            "id": DEFAULT_VOICE_ID,
+            "path": skill_root() / "assets" / "voice" / "default_storyteller_c06.wav",
+            "reference_text": DEFAULT_REF_TEXT,
+            "source": "built_in_default",
+        }
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assets = manifest.get("assets") if isinstance(manifest.get("assets"), list) else []
+    default_id = manifest.get("default_voice_id") or DEFAULT_VOICE_ID
+    asset = next((item for item in assets if item.get("id") == default_id), assets[0] if assets else {})
+    return {
+        "id": asset.get("id") or default_id,
+        "path": (manifest_path.parent / str(asset.get("file") or "default_storyteller_c06.wav")).resolve(),
+        "reference_text": asset.get("reference_text") or DEFAULT_REF_TEXT,
+        "manifest": str(manifest_path),
+        "source": "built_in_manifest",
+    }
+
+
+def plan_reference_voice(plan: dict) -> dict:
+    plan_voice = plan.get("voice") if isinstance(plan.get("voice"), dict) else {}
+    ref = plan_voice.get("reference_voice") if isinstance(plan_voice.get("reference_voice"), dict) else {}
+    raw_path = ref.get("path_or_id")
+    resolved = resolve_local_path(raw_path)
+    if resolved and resolved.exists():
+        return {
+            "id": ref.get("id") or DEFAULT_VOICE_ID,
+            "path": resolved,
+            "reference_text": ref.get("reference_text") or DEFAULT_REF_TEXT,
+            "manifest": ref.get("manifest"),
+            "source": "performance_plan",
+        }
+    return default_voice_asset()
+
+
+def resolve_reference_voice(args: argparse.Namespace, plan: dict) -> dict:
+    if args.reference_wav:
+        resolved = resolve_local_path(args.reference_wav)
+        if not resolved or not resolved.exists():
+            raise FileNotFoundError(f"reference wav does not exist: {args.reference_wav}")
+        if not args.reference_text:
+            raise ValueError(
+                "--reference-text is required when --reference-wav points to a custom voice. "
+                "Omit --reference-wav to use the bundled default storyteller voice."
+            )
+        return {
+            "id": "user_reference_voice",
+            "path": resolved,
+            "reference_text": args.reference_text,
+            "source": "cli",
+        }
+
+    default_ref = plan_reference_voice(plan)
+    if not default_ref["path"].exists():
+        raise FileNotFoundError(f"default reference wav does not exist: {default_ref['path']}")
+    print(
+        f"Info: using default storyteller reference voice: {default_ref['path']}",
+        file=sys.stderr,
+    )
+    return default_ref
+
+
 def load_qwen_model(model_id: str, device: str, dtype: torch.dtype):
     from qwen_tts import Qwen3TTSModel
 
@@ -100,13 +195,12 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     segment_dir.mkdir(parents=True, exist_ok=True)
 
-    ref_wav = Path(args.reference_wav).resolve()
-    if not ref_wav.exists():
-        raise FileNotFoundError(f"reference wav does not exist: {ref_wav}")
-
     os.environ.setdefault("HF_HOME", str(Path(args.cache_dir).resolve()))
 
     plan = load_plan(plan_path)
+    reference = resolve_reference_voice(args, plan)
+    ref_wav = reference["path"]
+    reference_text = args.reference_text or reference.get("reference_text") or DEFAULT_REF_TEXT
     render_items = build_render_items(plan["segments"])
     say_item_count = sum(1 for item in render_items if item["kind"] == "say")
     if args.max_segments > 0:
@@ -127,7 +221,7 @@ def main() -> int:
     print("Creating Qwen3-TTS voice clone prompt...", file=sys.stderr)
     voice_prompt = tts.create_voice_clone_prompt(
         ref_audio=str(ref_wav),
-        ref_text=args.reference_text,
+        ref_text=reference_text,
         x_vector_only_mode=args.x_vector_only_mode,
     )
 
@@ -229,8 +323,14 @@ def main() -> int:
         "device": loaded_device,
         "dtype": args.dtype,
         "sample_rate": sample_rate,
+        "default_reference_voice": {
+            "id": reference.get("id"),
+            "path": str(reference.get("path")),
+            "manifest": reference.get("manifest"),
+            "source": reference.get("source"),
+        } if reference.get("source") != "cli" else None,
         "reference_wav": str(ref_wav),
-        "reference_text": args.reference_text,
+        "reference_text": reference_text,
         "x_vector_only_mode": args.x_vector_only_mode,
         "language": args.language,
         "generation": gen_kwargs,

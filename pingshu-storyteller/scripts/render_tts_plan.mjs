@@ -3,6 +3,16 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const DEFAULT_REFERENCE_VOICE = {
+  id: "pingshu_default_storyteller_c06",
+  path_or_id: "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
+  manifest: "pingshu-storyteller/assets/voice/manifest.json",
+  consent_status: "project_generated_original",
+  rights_note: "Bundled generated original storyteller reference voice; not a real-person clone.",
+  reference_text:
+    "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。"
+};
+
 function usage() {
   const script = fileURLToPath(import.meta.url);
   console.error(`Usage: node ${script} <pingshu_script.json> <performance_plan.json>`);
@@ -34,9 +44,13 @@ const plan = {
     timbre_lock: true,
     role_voice_policy: "Same storyteller voice for narration and all characters; shift role through wording, pace, pressure, and pauses instead of separate timbres.",
     reference_voice: {
+      id: DEFAULT_REFERENCE_VOICE.id,
       required_for_split_render: "recommended",
-      path_or_id: null,
-      consent_status: "original"
+      path_or_id: DEFAULT_REFERENCE_VOICE.path_or_id,
+      manifest: DEFAULT_REFERENCE_VOICE.manifest,
+      reference_text: DEFAULT_REFERENCE_VOICE.reference_text,
+      consent_status: DEFAULT_REFERENCE_VOICE.consent_status,
+      rights_note: DEFAULT_REFERENCE_VOICE.rights_note
     },
     notes: voice.description || "Original storyteller persona; do not imitate a real performer."
   },

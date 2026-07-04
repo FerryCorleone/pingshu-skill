@@ -142,6 +142,8 @@ API 候选：
 - 两个都不满足：建议走云端 API。
 - 检测不到 GPU/显存时：让用户补充电脑型号、内存、GPU 型号和显存，不要猜。
 
+Skill 内置默认说书人参考音源在 `pingshu-storyteller/assets/voice/default_storyteller_c06.wav`，资产信息和参考文本在 `pingshu-storyteller/assets/voice/manifest.json`。本地 VoxCPM2 / Qwen3-TTS 默认直接使用它；API voice clone 只有在用户选择服务商并确认上传条款后才使用它。
+
 最低配置建议：
 
 | 模型 | macOS | Windows / Linux |
@@ -170,8 +172,9 @@ API 候选：
 使用约束：
 
 - 默认开启音色锁定。脚本会给每次生成注入单人说书人音色锚点。
+- 不传 `--reference-wav` 时，脚本会自动读取 `performance_plan.voice.reference_voice`，没有则回退到内置默认人声。
 - 短脚本如果分段渲染导致音色漂移，使用 `--single-pass`。
-- 较长脚本要在所有分段中使用同一个有授权的 `--reference-wav` 或 `--prompt-wav --prompt-text`。
+- 较长脚本要在所有分段中使用同一个内置、原创或已授权的 `reference_wav` / `prompt_wav`。
 - `--segment-performance` 只添加语气提示，不能用来制造不同角色音色。
 - `--pace-tempo` 可以轻微后处理语速，但不能替代真实停顿和 beat 写作。
 - 做成品评书节奏时，使用 `performance_plan.segments[].events`：`say` 事件交给 TTS，`pause` 事件渲染成真实静音。

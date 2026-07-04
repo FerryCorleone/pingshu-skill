@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "default_voice_id": "pingshu_default_storyteller_c06",
+  "generated_at": "2026-07-04T11:37:20+08:00",
+  "assets": [
+    {
+      "id": "pingshu_default_storyteller_c06",
+      "file": "default_storyteller_c06.wav",
+      "duration_sec": 15.483,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 16,
+      "size_bytes": 1486380,
+      "sha256": "abb4d11bd4a83622becc3d45f41fa8af76484181c04803513631278bcaa4f69c",
+      "persona": "原创中老年男声说书人，普通话为主，略粗粝但清楚，带一点北方评书台口，节奏中慢，包袱前会停一下。",
+      "reference_text": "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。",
+      "source": {
+        "generator": "VoxCPM2 local render",
+        "seed_voice": "project-generated original c06 pingshu voice",
+        "real_person_clone": false
+      },
+      "rights_status": "project_generated_original",
+      "default_use": [
+        "本地 VoxCPM2 渲染时，作为默认 reference_wav 和 prompt_wav，并把 reference_text 作为 prompt_text。",
+        "本地 Qwen3-TTS 0.6B 渲染时，作为默认 reference_wav，并把 reference_text 作为 reference_text。",
+        "API voice clone 路线只有在用户选择对应服务商、确认服务商条款，并接受上传该生成音源后才使用。"
+      ],
+      "replacement_policy": "用户可以指定自己的原创或已授权参考音频覆盖默认音色；覆盖时必须在产物 manifest 里记录来源和授权状态，不要改写本内置文件。"
+    }
+  ]
+}

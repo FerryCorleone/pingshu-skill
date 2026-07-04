@@ -36,7 +36,7 @@
 | --- | --- | --- |
 | 素材获取 | `references/story-sourcing.md`、`scripts/check_asr_cache.mjs` | 输出 `story_pack.json` |
 | 评书化改编 | `references/dramaturgy-and-style.md`、`references/modern-pingshu-method-cards.md`、`references/pingshu-tradition.md` | 输出 `pingshu_script.json` |
-| 表演与 TTS | `references/tts-provider-matrix.md`、`scripts/create_tts_job.mjs`、`scripts/render_voxcpm2_plan.py` | 输出 `performance_plan.json` 和音频 |
+| 表演与 TTS | `references/tts-provider-matrix.md`、`scripts/create_tts_job.mjs`、`scripts/render_voxcpm2_plan.py`、`assets/voice/default_storyteller_c06.wav` | 输出 `performance_plan.json` 和音频 |
 | 校验 | `scripts/validate_skill_outputs.mjs`、`scripts/lint_pingshu_quality.mjs` | 拦截薄剧情和弱风格 |
 
 这样 Agent 内部有清楚路由，但不会把太多选择暴露给普通用户。

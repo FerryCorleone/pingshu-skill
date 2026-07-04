@@ -9,9 +9,13 @@
     "timbre_lock": true,
     "role_voice_policy": "Same storyteller voice for narration and all characters; shift role through wording, pace, pressure, and pauses instead of separate timbres.",
     "reference_voice": {
+      "id": "pingshu_default_storyteller_c06",
       "required_for_split_render": "recommended",
-      "path_or_id": null,
-      "consent_status": "original"
+      "path_or_id": "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
+      "manifest": "pingshu-storyteller/assets/voice/manifest.json",
+      "reference_text": "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。",
+      "consent_status": "project_generated_original",
+      "rights_note": "Bundled generated original storyteller reference voice; not a real-person clone."
     },
     "notes": "原创的温暖北方说书人，不模仿真实人物。"
   },
@@ -101,13 +105,13 @@
       "post_sfx_pause_ms": 420,
       "post_sfx_pause_min_ms": 320,
       "post_sfx_pause_max_ms": 650,
-      "notes": "醒木只做少量定场和回扣，不写进朗读文本。"
+      "notes": "Use waking block cues sparingly after the spoken line; never put SFX directions in TTS text."
     },
     "loudness_note": "Speech stays primary. Insert silence or effects after TTS render if provider lacks pause control."
   },
   "rendering_notes": [
     "Keep one stable storyteller timbre across all segments; do not assign separate character voices.",
-    "Render short scripts in a single pass when the provider drifts across split segments.",
+    "Use single-pass only for audition. Final pingshu audio should preserve event-level pauses and pass ASR audit.",
     "Render split segments only with the same provider voice id or the same local reference/prompt voice.",
     "For final pingshu timing, expand important segments into events: say for spoken text and pause for real inserted silence.",
     "Insert waking block SFX only as post-processed audio blocks from assets/sfx; do not ask TTS to say SFX labels.",

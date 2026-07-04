@@ -1,5 +1,25 @@
 # 资产与第三方说明
 
+## 内置默认人声
+
+仓库内置一段默认说书人参考音频：
+
+```text
+pingshu-storyteller/assets/voice/default_storyteller_c06.wav
+```
+
+它是一段本项目用本地 VoxCPM2 工作流生成的原创参考声，用来帮助本地 TTS 和支持 voice clone 的 API 更接近默认说书人口吻。它不是对真实艺人、主播或普通人的声音克隆。
+
+参考文本和资产信息记录在：
+
+```text
+pingshu-storyteller/assets/voice/manifest.json
+```
+
+本地 VoxCPM2 / Qwen3-TTS 可以默认使用这段音频。API voice clone 路线会把参考音频上传到第三方服务商，必须先由用户确认所选服务商条款、数据政策和上传范围；如果用户不接受上传，就使用 voice design 或服务商系统音色试听。
+
+用户可以指定自己的原创或已授权参考音频覆盖默认音色，但需要在生成产物里记录来源和授权状态。
+
 ## 内置音效
 
 仓库内置一个醒木音效：

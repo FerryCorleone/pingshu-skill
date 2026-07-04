@@ -19,7 +19,7 @@ const providers = {
     mode: "api",
     required_env: ["QWEN_TTS_API_KEY"],
     alternative_env: ["DASHSCOPE_API_KEY"],
-    setup: "Set QWEN_TTS_API_KEY or DASHSCOPE_API_KEY and provide an original/licensed reference wav. Reuse QWEN_TTS_VOICE_ID after creating a Qwen voice clone."
+    setup: "Set QWEN_TTS_API_KEY or DASHSCOPE_API_KEY. After the user accepts provider upload terms, use the bundled generated storyteller reference voice or another original/licensed reference wav. Reuse QWEN_TTS_VOICE_ID after creating a Qwen voice clone."
   },
   "xiaomi-mimo": {
     mode: "api",
@@ -31,7 +31,7 @@ const providers = {
     mode: "api",
     required_env: ["XIAOMI_MIMO_API_KEY"],
     alternative_env: ["MIMO_API_KEY"],
-    setup: "Set XIAOMI_MIMO_API_KEY or MIMO_API_KEY and provide an original/licensed reference wav. Use conservative request pacing for long scripts."
+    setup: "Set XIAOMI_MIMO_API_KEY or MIMO_API_KEY. After the user accepts provider upload terms, use the bundled generated storyteller reference voice or another original/licensed reference wav. Use conservative request pacing for long scripts."
   },
   "aliyun-cosyvoice": {
     mode: "api",

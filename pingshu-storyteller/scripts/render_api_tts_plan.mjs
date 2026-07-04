@@ -7,6 +7,9 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const defaultSfxDir = resolve(scriptDir, "..", "assets", "sfx");
+const defaultVoiceDir = resolve(scriptDir, "..", "assets", "voice");
+const DEFAULT_REFERENCE_TEXT =
+  "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。";
 const SFX_ALIASES = new Map([
   ["waking_block_soft", "waking_block"],
   ["waking_block_firm", "waking_block"],
@@ -52,7 +55,7 @@ const PROVIDERS = {
 
 function usage() {
   console.error(
-    "Usage: node render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <output_dir> [--provider qwen|qwen-voiceclone|xiaomi-mimo|xiaomi-mimo-voiceclone|all] [--keys-stdin] [--reference-wav <path>] [--qwen-voice-id <id>] [--segment-ids id1,id2] [--max-segments n] [--phrase-chunks]"
+    "Usage: node render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <output_dir> [--provider qwen|qwen-voiceclone|xiaomi-mimo|xiaomi-mimo-voiceclone|all] [--keys-stdin] [--reference-wav <path>] [--reference-text <text>] [--qwen-voice-id <id>] [--segment-ids id1,id2] [--max-segments n] [--phrase-chunks]"
   );
   process.exit(2);
 }
@@ -66,6 +69,7 @@ const outputRoot = resolve(args[2]);
 let providerArg = "all";
 let keysStdin = false;
 let referenceWav = null;
+let referenceText = null;
 let segmentIds = null;
 let maxSegments = 0;
 let phraseChunks = false;
@@ -80,6 +84,9 @@ for (let i = 3; i < args.length; i += 1) {
     keysStdin = true;
   } else if (args[i] === "--reference-wav") {
     referenceWav = resolve(args[i + 1]);
+    i += 1;
+  } else if (args[i] === "--reference-text") {
+    referenceText = args[i + 1];
     i += 1;
   } else if (args[i] === "--segment-ids") {
     segmentIds = new Set(String(args[i + 1]).split(",").map((id) => id.trim()).filter(Boolean));
@@ -391,18 +398,81 @@ function writeBase64ToFile(data, outputPath) {
 }
 
 function readReferenceVoiceDataUrl(pathArg = referenceWav) {
-  const path = pathArg || plan?.voice?.reference_voice?.path_or_id;
-  if (!path) throw new Error("A reference voice wav is required for voiceclone providers");
-  const resolved = resolve(path);
+  const reference = resolveReferenceVoice(pathArg);
+  const resolved = reference.path;
   if (!existsSync(resolved)) throw new Error(`Reference voice file does not exist: ${resolved}`);
   const bytes = readFileSync(resolved);
   if (bytes.length > 10 * 1024 * 1024) {
     throw new Error("Reference voice must be <= 10 MB for current API voice clone paths");
   }
   return {
+    id: reference.id,
     path: resolved,
+    referenceText: reference.referenceText,
+    hasExplicitReferenceText: reference.hasExplicitReferenceText,
+    source: reference.source,
     dataUrl: `data:audio/wav;base64,${bytes.toString("base64")}`
   };
+}
+
+function resolveCandidatePath(pathLike) {
+  if (!pathLike) return null;
+  const candidates = [
+    resolve(pathLike),
+    resolve(scriptDir, "..", pathLike),
+    resolve(scriptDir, "..", "..", pathLike)
+  ];
+  return candidates.find((candidate) => existsSync(candidate)) || resolve(pathLike);
+}
+
+function defaultReferenceVoice() {
+  const manifestPath = join(defaultVoiceDir, "manifest.json");
+  if (!existsSync(manifestPath)) {
+    return {
+      id: "pingshu_default_storyteller_c06",
+      path: join(defaultVoiceDir, "default_storyteller_c06.wav"),
+      referenceText: DEFAULT_REFERENCE_TEXT,
+      hasExplicitReferenceText: true,
+      source: "built_in_default"
+    };
+  }
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const assets = Array.isArray(manifest.assets) ? manifest.assets : [];
+  const defaultId = manifest.default_voice_id || "pingshu_default_storyteller_c06";
+  const asset = assets.find((item) => item.id === defaultId) || assets[0] || {};
+  return {
+    id: asset.id || defaultId,
+    path: join(defaultVoiceDir, asset.file || "default_storyteller_c06.wav"),
+    referenceText: asset.reference_text || DEFAULT_REFERENCE_TEXT,
+    hasExplicitReferenceText: true,
+    manifest: manifestPath,
+    source: "built_in_manifest"
+  };
+}
+
+function resolveReferenceVoice(pathArg = null) {
+  if (pathArg) {
+    return {
+      id: "cli_reference_voice",
+      path: resolveCandidatePath(pathArg),
+      referenceText: referenceText || DEFAULT_REFERENCE_TEXT,
+      hasExplicitReferenceText: Boolean(referenceText),
+      source: "cli"
+    };
+  }
+  const ref = plan?.voice?.reference_voice;
+  const planPath = ref?.path_or_id ? resolveCandidatePath(ref.path_or_id) : null;
+  if (planPath && existsSync(planPath)) {
+    return {
+      id: ref.id || "pingshu_default_storyteller_c06",
+      path: planPath,
+      referenceText: ref.reference_text || DEFAULT_REFERENCE_TEXT,
+      hasExplicitReferenceText: Boolean(ref.reference_text),
+      manifest: ref.manifest,
+      source: "performance_plan"
+    };
+  }
+  return defaultReferenceVoice();
 }
 
 function referenceVoiceDescription() {
@@ -518,6 +588,12 @@ async function callQwenTts(apiKey, text, segment) {
 async function createQwenVoiceClone(apiKey) {
   const config = PROVIDERS["qwen-voiceclone"];
   const reference = readReferenceVoiceDataUrl();
+  if (reference.source === "cli" && !reference.hasExplicitReferenceText) {
+    throw new Error(
+      "--reference-text is required with custom --reference-wav for qwen-voiceclone. " +
+      "Omit --reference-wav to use the bundled default storyteller voice."
+    );
+  }
   const response = await fetchWithRetry(config.customizationEndpoint, {
     method: "POST",
     headers: {
@@ -531,7 +607,7 @@ async function createQwenVoiceClone(apiKey) {
         target_model: config.model,
         preferred_name: `pingshu_${Date.now().toString(36).slice(-8)}`,
         audio: { data: reference.dataUrl },
-        text: "列位，今儿咱慢慢说。肯德基门口这只箱子，装的是金条，也是信任。您把耳朵支棱起来，后头这一下，有意思。"
+        text: reference.referenceText || DEFAULT_REFERENCE_TEXT
       }
     })
   }, "qwen-voiceclone-create");
@@ -693,7 +769,7 @@ async function renderQwenVoiceClone(apiKey) {
   const provider = "qwen-voiceclone";
   const config = PROVIDERS[provider];
   const voiceClone = qwenVoiceId
-    ? { voice: qwenVoiceId, reference_path: referenceWav || plan?.voice?.reference_voice?.path_or_id || null, request_id: null }
+    ? { voice: qwenVoiceId, reference_path: resolveReferenceVoice(referenceWav).path, request_id: null }
     : await createQwenVoiceClone(apiKey);
   const outDir = join(outputRoot, "qwen3-tts-vc-c06-reference");
   mkdirSync(outDir, { recursive: true });

@@ -38,6 +38,12 @@ SFX_ALIASES = {
     "waking_block_close": "waking_block",
 }
 
+DEFAULT_VOICE_ID = "pingshu_default_storyteller_c06"
+DEFAULT_REFERENCE_TEXT = (
+    "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，"
+    "也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。"
+)
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -77,6 +83,99 @@ def load_plan(path: Path) -> dict:
     if not isinstance(segments, list) or not segments:
         raise ValueError("performance_plan.json must include a non-empty segments array")
     return plan
+
+
+def skill_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def default_voice_manifest_path() -> Path:
+    return skill_root() / "assets" / "voice" / "manifest.json"
+
+
+def resolve_local_path(value: str | None) -> Path | None:
+    if not value:
+        return None
+    path = Path(value).expanduser()
+    if path.is_absolute():
+        return path
+    candidates = [
+        Path.cwd() / path,
+        skill_root() / path,
+        repo_root() / path,
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate.resolve()
+    return (Path.cwd() / path).resolve()
+
+
+def default_voice_asset() -> dict:
+    manifest_path = default_voice_manifest_path()
+    if not manifest_path.exists():
+        return {
+            "id": DEFAULT_VOICE_ID,
+            "path": skill_root() / "assets" / "voice" / "default_storyteller_c06.wav",
+            "reference_text": DEFAULT_REFERENCE_TEXT,
+            "source": "built_in_default",
+        }
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assets = manifest.get("assets") if isinstance(manifest.get("assets"), list) else []
+    default_id = manifest.get("default_voice_id") or DEFAULT_VOICE_ID
+    asset = next((item for item in assets if item.get("id") == default_id), assets[0] if assets else {})
+    return {
+        "id": asset.get("id") or default_id,
+        "path": (manifest_path.parent / str(asset.get("file") or "default_storyteller_c06.wav")).resolve(),
+        "reference_text": asset.get("reference_text") or DEFAULT_REFERENCE_TEXT,
+        "manifest": str(manifest_path),
+        "source": "built_in_manifest",
+    }
+
+
+def plan_reference_voice(plan: dict) -> dict:
+    plan_voice = plan.get("voice") if isinstance(plan.get("voice"), dict) else {}
+    ref = plan_voice.get("reference_voice") if isinstance(plan_voice.get("reference_voice"), dict) else {}
+    raw_path = ref.get("path_or_id")
+    resolved = resolve_local_path(raw_path)
+    if resolved and resolved.exists():
+        return {
+            "id": ref.get("id") or DEFAULT_VOICE_ID,
+            "path": resolved,
+            "reference_text": ref.get("reference_text") or DEFAULT_REFERENCE_TEXT,
+            "manifest": ref.get("manifest"),
+            "source": "performance_plan",
+        }
+    return default_voice_asset()
+
+
+def apply_default_voice_args(args: argparse.Namespace, plan: dict) -> dict | None:
+    default_ref = plan_reference_voice(plan)
+
+    used_default = False
+    if not args.reference_wav and default_ref["path"].exists():
+        args.reference_wav = str(default_ref["path"])
+        used_default = True
+    if not args.prompt_wav and not args.prompt_text and default_ref["path"].exists():
+        args.prompt_wav = str(default_ref["path"])
+        args.prompt_text = str(default_ref.get("reference_text") or DEFAULT_REFERENCE_TEXT)
+        used_default = True
+    elif args.prompt_wav and not args.prompt_text:
+        prompt_path = resolve_local_path(args.prompt_wav)
+        if prompt_path and prompt_path.resolve() == default_ref["path"].resolve():
+            args.prompt_text = str(default_ref.get("reference_text") or DEFAULT_REFERENCE_TEXT)
+            used_default = True
+
+    if used_default:
+        print(
+            f"Info: using default storyteller reference voice: {default_ref['path']}",
+            file=sys.stderr,
+        )
+        return default_ref
+    return None
 
 
 def validate_prompt_args(args: argparse.Namespace) -> None:
@@ -449,7 +548,6 @@ def encode_m4a(wav_path: Path, m4a_path: Path) -> bool:
 
 def main() -> int:
     args = parse_args()
-    validate_prompt_args(args)
 
     plan_path = Path(args.performance_plan).resolve()
     output_dir = Path(args.output_dir).resolve()
@@ -458,6 +556,8 @@ def main() -> int:
     segment_dir.mkdir(parents=True, exist_ok=True)
 
     plan = load_plan(plan_path)
+    default_ref = apply_default_voice_args(args, plan)
+    validate_prompt_args(args)
     segments = plan["segments"]
     if args.max_segments > 0:
         segments = segments[: args.max_segments]
@@ -626,6 +726,12 @@ def main() -> int:
         "control_prepended_to_text": prepend_control,
         "voice_lock": voice_lock,
         "single_pass": args.single_pass,
+        "default_reference_voice": {
+            "id": default_ref.get("id"),
+            "path": str(default_ref.get("path")),
+            "manifest": default_ref.get("manifest"),
+            "source": default_ref.get("source"),
+        } if default_ref else None,
         "reference_wav": str(Path(args.reference_wav).resolve()) if args.reference_wav else None,
         "prompt_wav": str(Path(args.prompt_wav).resolve()) if args.prompt_wav else None,
         "sfx_gain_db": args.sfx_gain_db,

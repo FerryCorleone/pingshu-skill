@@ -2,6 +2,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+const DEFAULT_REFERENCE_TEXT =
+  "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。";
+
 const providers = {
   openai: {
     mode: "api",
@@ -26,9 +29,10 @@ const providers = {
     required_env: ["QWEN_TTS_API_KEY"],
     alternative_env: ["DASHSCOPE_API_KEY"],
     reference_voice_required: true,
-    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen-voiceclone --reference-wav <original_or_licensed_voice.wav> --phrase-chunks",
+    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen-voiceclone --phrase-chunks",
     notes: [
       "Use Alibaba Cloud Model Studio voice enrollment to create or reuse a Qwen voice clone id.",
+      "By default, use the bundled generated storyteller reference voice from the performance plan after the user accepts provider upload terms.",
       "Prefer QWEN_TTS_VOICE_ID or --qwen-voice-id after the first successful enrollment.",
       "Keep target text clean; use phrase-level post-processing for pauses."
     ]
@@ -49,9 +53,10 @@ const providers = {
     required_env: ["XIAOMI_MIMO_API_KEY"],
     alternative_env: ["MIMO_API_KEY"],
     reference_voice_required: true,
-    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo-voiceclone --reference-wav <original_or_licensed_voice.wav> --request-delay-ms 15000",
+    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo-voiceclone --request-delay-ms 15000",
     notes: [
       "Use MiMo V2.5 TTS voice clone with an original/licensed reference wav.",
+      "By default, use the bundled generated storyteller reference voice from the performance plan after the user accepts provider upload terms.",
       "Put voice/performance instructions in the user message, not in the assistant text.",
       "Use conservative request pacing; this endpoint may return 429 when rendering many chunks quickly."
     ]
@@ -83,10 +88,10 @@ const providers = {
   "local-voxcpm2": {
     mode: "local",
     required_env: [],
-    command_hint: "python pingshu-storyteller/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir> --segment-performance --pace-tempo --reference-wav <original_or_licensed_voice.wav>",
+    command_hint: "python pingshu-storyteller/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir> --segment-performance --pace-tempo",
     notes: [
       "Install VoxCPM2 in a Python 3.10-3.12 environment with torch and torchaudio.",
-      "Use an original voice-control prompt or consented reference audio; do not clone a real performer without permission.",
+      "The renderer uses the bundled generated default storyteller reference voice unless the user provides another original or licensed voice.",
       "The bundled renderer can render event-level say/pause plans, insert real silence for pause events, add light tempo variation by pace, and insert sparse waking block SFX from assets/sfx.",
       "Use the same original or licensed reference/prompt voice for all split renders to reduce timbre drift."
     ]
@@ -94,12 +99,12 @@ const providers = {
   "local-qwen3-tts": {
     mode: "local",
     required_env: [],
-    reference_voice_required: true,
-    command_hint: "python pingshu-storyteller/scripts/render_qwen3_tts_plan.py <performance_plan.json> <out_dir> --reference-wav <original_or_licensed_voice.wav>",
+    reference_voice_required: false,
+    command_hint: "python pingshu-storyteller/scripts/render_qwen3_tts_plan.py <performance_plan.json> <out_dir>",
     notes: [
       "Install qwen-tts in .venv-qwen3-tts or set PINGSHU_QWEN3_TTS_PYTHON.",
       "Use Qwen3-TTS Base for local reference-audio voice clone rendering.",
-      "Provide the transcript for the reference wav when possible; x-vector-only mode is a lower-fidelity fallback.",
+      "The renderer uses the bundled generated default storyteller reference voice and transcript unless the user provides another original or licensed voice.",
       "The bundled renderer can download the model into the Hugging Face cache, insert real silence between plan segments, and insert sparse waking block SFX from assets/sfx."
     ]
   }
@@ -136,6 +141,13 @@ const job = {
   reference_voice_required: provider.reference_voice_required || false,
   command_hint: provider.command_hint || null,
   voice: plan.voice || {},
+  default_reference_voice: plan.voice?.reference_voice || {
+    id: "pingshu_default_storyteller_c06",
+    path_or_id: "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
+    manifest: "pingshu-storyteller/assets/voice/manifest.json",
+    reference_text: DEFAULT_REFERENCE_TEXT,
+    consent_status: "project_generated_original"
+  },
   segments: plan.segments.map((segment, index) => ({
     id: segment.id || `seg-${String(index + 1).padStart(3, "0")}`,
     text: segment.text,
