@@ -27,11 +27,52 @@ const requestText = [story.request?.user_goal, story.request?.target_work_or_eve
   .map((value) => String(value || ""))
   .join(" ");
 const asksForSignatureScene = /名场面|经典片段|经典场面|名片段|综艺片段|采访片段|剧集片段|clip|Say My Name|Breaking Bad|绝命毒师/i.test(requestText);
+const asksForLongEpisode = /整集|全集|完整(?:一)?[期集季]|完整.*(?:评书|音频|讲|复述|复盘)|最后一[期集季]|总决赛|冠军.*[期集]|第[一二三四五六七八九十百\d]+[期集季]|full episode|whole episode|entire episode|finale/i.test(requestText);
 if (asksForSignatureScene && signatureMoments.length === 0) {
   failures.push("narrative_brief.signature_moments is required for named famous scenes or specific clips");
 }
 if (asksForSignatureScene && sceneTrace.length < 6) {
   failures.push("narrative_brief.scene_trace should include at least six chronological micro-beats for named scenes or clips");
+}
+if (asksForLongEpisode) {
+  const sourceHunt = story.source_hunt && typeof story.source_hunt === "object" ? story.source_hunt : null;
+  if (!sourceHunt) {
+    failures.push("story_pack.source_hunt is required for whole-episode or long-form requests");
+  } else {
+    const searchedPlatforms = Array.isArray(sourceHunt.searched_platforms) ? sourceHunt.searched_platforms : [];
+    const searchQueries = Array.isArray(sourceHunt.search_queries) ? sourceHunt.search_queries : [];
+    const usableMaterials = Array.isArray(sourceHunt.usable_materials) ? sourceHunt.usable_materials : [];
+    const coverageLevel = String(sourceHunt.coverage_level || "").trim();
+    const decision = String(sourceHunt.decision || "").trim();
+    const sceneLevelCoverage = new Set([
+      "scene_level",
+      "multi_clip_scene_level",
+      "full_episode_transcript",
+      "full_episode_video_asr",
+      "user_supplied_episode"
+    ]);
+    if (searchedPlatforms.length < 3) {
+      failures.push("story_pack.source_hunt.searched_platforms should cover at least three platform/channel families for long-form requests");
+    }
+    if (searchQueries.length < 3) {
+      warnings.push("story_pack.source_hunt.search_queries is thin; record multiple Chinese/English/platform-specific searches");
+    }
+    if (usableMaterials.length < 2) {
+      failures.push("story_pack.source_hunt.usable_materials should include at least two usable materials or explain why the user must provide a source");
+    }
+    if (!sceneLevelCoverage.has(coverageLevel)) {
+      failures.push(`story_pack.source_hunt.coverage_level is not enough for complete audio: ${coverageLevel || "missing"}`);
+    }
+    if (["gather_more", "ask_user_for_source", "downgrade_to_recap"].includes(decision)) {
+      failures.push(`story_pack.source_hunt.decision says not ready for complete scripting: ${decision}`);
+    }
+  }
+  if (sceneTrace.length < 12) {
+    failures.push("narrative_brief.scene_trace should include at least twelve chronological beats for whole-episode or long-form requests");
+  }
+  if (!Array.isArray(story.scenes) || story.scenes.length < 6) {
+    failures.push("story_pack.scenes should include at least six sourced scenes for whole-episode or long-form requests");
+  }
 }
 for (const [index, step] of sceneTrace.entries()) {
   if (!step || typeof step !== "object") {
@@ -325,13 +366,38 @@ const maxTraditional = Number(arrangement.technique_budget?.traditional_flavor_m
 if (Number.isFinite(maxTraditional) && traditionalMarkers > maxTraditional + 2) {
   warnings.push("traditional pingshu markers exceed planned budget; reduce guankou/catchphrase seasoning");
 }
-const propSfxHits = segments.flatMap((segment) => Array.isArray(segment.performance?.sfx_after) ? segment.performance.sfx_after : []);
+const propSfxEntries = segments.flatMap((segment, index) => {
+  const sfx = Array.isArray(segment.performance?.sfx_after) ? segment.performance.sfx_after : [];
+  return sfx.map((id) => ({ id: String(id), index, segment }));
+});
+const propSfxHits = propSfxEntries.map((entry) => entry.id);
 if (segments.length <= 12 && propSfxHits.length > 2) {
   warnings.push("waking block SFX is overused for a short script; keep prop sounds to opening, rare turn, or closing only");
 }
 const unknownPropSfx = propSfxHits.filter((id) => !["waking_block", "waking_block_soft", "waking_block_firm", "waking_block_light", "waking_block_medium", "waking_block_close"].includes(String(id)));
 if (unknownPropSfx.length) {
   failures.push(`unsupported prop SFX ids: ${[...new Set(unknownPropSfx)].join(", ")}`);
+}
+const firstWakingEntry = propSfxEntries.find((entry) => entry.id.startsWith("waking_block"));
+if (firstWakingEntry) {
+  if (firstWakingEntry.index !== 0) {
+    failures.push("first waking_block should follow the opening chapter title in seg-001; do not wait until the story body has started");
+  } else {
+    const titleMarker = scriptTitle ? `《${scriptTitle}》` : "";
+    const firstText = String(firstWakingEntry.segment.text || "");
+    if (titleMarker && firstText.includes(titleMarker)) {
+      const afterTitle = firstText
+        .slice(firstText.indexOf(titleMarker) + titleMarker.length)
+        .replace(/^[。.!！?？；;，,、\s]+/, "");
+      if (afterTitle.length > 6) {
+        failures.push("opening segment with waking_block should stop after the chapter title; move background and conflict setup to seg-002 or event-level text after the SFX");
+      }
+    } else if (firstText.length > 90) {
+      failures.push("opening segment with waking_block is too long; the first prop sound should land right after the title, not after a full setup paragraph");
+    }
+  }
+} else if (segments.length >= 4 && /今儿.*讲|今天.*讲|列位/.test(firstSegmentText)) {
+  warnings.push("formal pingshu audio should usually place one waking_block right after the opening chapter title");
 }
 
 for (const segment of segments) {

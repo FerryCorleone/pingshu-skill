@@ -55,6 +55,24 @@
       "notes": "string"
     }
   ],
+  "source_hunt": {
+    "intent_type": "full_episode | long_episode | scene_clip | event_recap",
+    "searched_platforms": ["official_site", "bilibili", "youtube", "douyin", "xiaohongshu", "weibo", "search_engine"],
+    "search_queries": ["string"],
+    "usable_materials": [
+      {
+        "source_id": "src-001",
+        "platform": "string",
+        "material_type": "full_video | official_clip | fan_clip | subtitle | asr | recap | article | timeline_post",
+        "coverage": "full | partial | key_scene | outcome_only",
+        "time_range": "string",
+        "access_status": "accessible | login_required | blocked | unavailable",
+        "notes": "string"
+      }
+    ],
+    "coverage_level": "scene_level | multi_clip_scene_level | full_episode_transcript | full_episode_video_asr | user_supplied_episode | outline_only | insufficient",
+    "decision": "continue_to_script | gather_more | ask_user_for_source | downgrade_to_recap"
+  },
   "characters": [
     {
       "id": "char-001",
@@ -84,6 +102,8 @@
 当用户要求“名场面”“经典片段”“综艺名片段”“采访片段”或某个具体场景时，`narrative_brief.signature_moments` 是必填字段。它用于锁住观众真正想听的短关键台词、视觉动作、反应和物件。短外语名句如果是标题、梗或片段记忆点，例如 `Say my name`，不要全部意译；正文和 TTS 里应保留原句，再用中文评书语气接住。版权对白只能保留必要短句，不写长段逐字对白。
 
 当用户要求讲已有剧集、动漫、综艺、采访或影视片段时，`narrative_brief.scene_trace` 是必填字段。它不是剧情大纲，而是原场景时间线：每一步都要写出画面、动作、对白功能、反应和局势变化。`pingshu_script.segments[].scene_trace_ids` 应尽量指向对应微镜头，避免正文变成“剧情梗概朗读”。
+
+当用户要求整集、全集、完整一期、最后一期、总决赛或其他长内容时，`source_hunt` 是必填字段。`source_hunt.coverage_level` 必须证明 Agent 找到的是场景级材料，而不只是结局、分数、百科或新闻摘要。只有 `scene_level`、`multi_clip_scene_level`、`full_episode_transcript`、`full_episode_video_asr` 或 `user_supplied_episode` 才能继续生成“完整评书音频”；`outline_only`、`outcome_only` 或 `insufficient` 只能继续找素材、询问用户，或降级为复盘。
 
 ## pingshu_script.json
 
@@ -193,7 +213,7 @@
 
 `title_design` 是强制字段。它负责让标题先定调：标题要像章回体喜剧的“回目”，两句并列、轻微对仗，能提示人物、动作、物件、后果或反转。可以参考《武林外传》片名的结构气质，但必须原创，不直接套用或改写现成标题。
 
-开头可以用短传统定场引出标题，例如“闲言少叙，书归正传。列位，今儿咱讲一回《标题》。”但这只是开门亮相，后面必须立刻进入背景、人物关系和核心冲突。
+开头可以用短传统定场引出标题，例如“闲言少叙，书归正传。列位，今儿咱讲一回《标题》。”这个报回目段要短，醒木应紧跟标题之后落下；背景、人物关系和核心冲突从下一段开始。如果把标题、背景和冲突都塞进 `seg-001`，再把 `sfx_after` 挂在 `seg-001` 后面，醒木就会落得太晚。
 
 `technique_arrangement` 是强制字段。它负责把“武器库”编排成节目：第一视角内心戏、传统定场、贯口、回扣和留白都要先有预算和位置。没有编排，宁可少用技巧。
 

@@ -11,9 +11,9 @@ if (!asrArg) {
 const asr = JSON.parse(readFileSync(resolve(asrArg), "utf8"));
 const script = scriptArg ? JSON.parse(readFileSync(resolve(scriptArg), "utf8")) : null;
 const segments = Array.isArray(asr.segments) ? asr.segments : [];
-const transcriptText = [asr.text, ...segments.map((segment) => segment.text)]
-  .map((value) => String(value || ""))
-  .join("\n");
+const segmentText = segments.map((segment) => String(segment.text || "")).join("\n");
+const fullText = String(asr.text || "");
+const transcriptText = segmentText.trim() || fullText;
 const scriptText = script
   ? [
       script.title,
@@ -52,7 +52,8 @@ const finiteEnds = segments.map((segment) => Number(segment.end)).filter(Number.
 const start = finiteStarts.length ? Math.min(...finiteStarts) : 0;
 const end = finiteEnds.length ? Math.max(...finiteEnds) : 0;
 const durationSec = Math.max(0, end - start);
-const spokenChars = transcriptText.replace(/[^\p{Script=Han}A-Za-z0-9]/gu, "").length;
+const densityText = segmentText.trim() || fullText;
+const spokenChars = densityText.replace(/[^\p{Script=Han}A-Za-z0-9]/gu, "").length;
 const charsPerSecond = durationSec > 0 ? spokenChars / durationSec : 0;
 if (charsPerSecond > 5.5) {
   warnings.push(`speech density is high for pingshu narration: ${charsPerSecond.toFixed(2)} chars/sec`);

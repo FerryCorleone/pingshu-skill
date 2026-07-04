@@ -19,10 +19,10 @@
       "style_reference": "回目式喜剧标题：前半句写小赵写怨气草稿，后半句写小龙虾 Agent 错把草稿送进全员群。",
       "title_formula": "人物 + 情绪动作 + 物件，人物/Agent + 错误动作 + 公共场合。",
       "comic_hook": "标题把私人怨气和全员公开撞在一块，先制造职场事故感。",
-      "opening_line": "第一段用“闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。”入书，然后立刻交代办公室、周一、草稿和误发风险。"
+      "opening_line": "第一段只用“闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。”报回目，随后落醒木；办公室、周一、草稿和误发风险从第二段开始讲。"
     },
     "technique_arrangement": {
-      "overall_strategy": "开头用回目式标题和一句轻定场说明这是办公室奇案，中段只给 Agent 一个字面理解的脑内逻辑，其余段落直走事故链。",
+      "overall_strategy": "开头用回目式标题和一句轻定场报回目，醒木落下后再进入办公室奇案；中段只给 Agent 一个字面理解的脑内逻辑，其余段落直走事故链。",
       "technique_budget": {
         "first_person_inner_monologue_max": 1,
         "traditional_flavor_max": 2,
@@ -45,8 +45,8 @@
         {
           "segment_id": "seg-001",
           "type": "short_opening",
-          "purpose": "用“闲言少叙，书归正传”和回目式标题轻轻定调，不拉长古风。",
-          "restraint": "只放一句，马上回到现代办公室事故。"
+          "purpose": "用“闲言少叙，书归正传”和回目式标题轻轻定调，报完题目马上落醒木。",
+          "restraint": "只放一句，不把背景和剧情塞进报回目段。"
         },
         {
           "segment_id": "seg-005",
@@ -62,7 +62,7 @@
     "protagonist_arc": "小赵从困倦吐槽的普通员工，变成被自动化推到台前答辩的人。",
     "stakes": "真正的风险不是文档格式错了，而是私人吐槽被当成正式表达，社交语境被机器误读。",
     "beat_order": ["cold_hook", "context", "trigger", "complication", "low_point", "resolution"],
-    "opening_contract": "前两段先交代这是办公室、周一、草稿和 Agent 误读标题的事故，不让听众只听见俏皮话。",
+    "opening_contract": "第一段报回目并落醒木，第二段交代这是办公室、周一、草稿和 Agent 误读标题的事故，不让听众只听见俏皮话。",
     "ending_contract": "结尾落在一个问号造成的职场压力，兑现“技术完成任务但没理解人”的笑点。"
   },
   "segments": [
@@ -70,27 +70,27 @@
       "id": "seg-001",
       "purpose": "cold_hook",
       "source_scene_ids": ["scene-001"],
-      "story_function": "用反常结果开场：一个标题把私人草稿推成公开事故。",
-      "text": "闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。这故事说的是周一早上的一桩办公室奇案：产品经理小赵写了个吐槽草稿，旁边的小龙虾 Agent 太勤快，一个标题，差点把他送进全员群现场答辩。",
+      "story_function": "用短定场和回目式标题开书，让醒木落在故事正式开始之前。",
+      "text": "闲言少叙，书归正传。列位，今儿咱讲一回《小赵怨写周报稿，龙虾错送全员群》。",
       "performance": {
         "emotion": "warm_setup",
         "pace": "medium_slow",
         "pause_after_ms": 350,
-        "emphasis": ["周一早上", "奇案"],
-        "sfx_after": []
+        "emphasis": ["小赵", "周报稿", "全员群"],
+        "sfx_after": ["waking_block"]
       }
     },
     {
       "id": "seg-002",
       "purpose": "context",
       "source_scene_ids": ["scene-001"],
-      "story_function": "交代小赵的状态和草稿背景，让误发事故有现实入口。",
-      "text": "小赵这个人，心不坏，就是困。咖啡还没咽下去，手底下先写了一段草稿，专门吐槽昨儿个会开得像绕城高速。",
+      "story_function": "交代办公室奇案、小赵的状态和草稿背景，让误发事故有现实入口。",
+      "text": "这故事说的是周一早上的一桩办公室奇案：产品经理小赵写了个吐槽草稿，旁边的小龙虾 Agent 太勤快，一个标题，差点把他送进全员群现场答辩。小赵这个人，心不坏，就是困。咖啡还没咽下去，手底下先写了一段草稿，专门吐槽昨儿个会开得像绕城高速。",
       "performance": {
         "emotion": "dry_mischief",
         "pace": "medium",
         "pause_after_ms": 280,
-        "emphasis": ["心不坏", "就是困", "绕城高速"],
+        "emphasis": ["办公室奇案", "全员群", "绕城高速"],
         "sfx_after": []
       }
     },
@@ -112,7 +112,7 @@
         "pace": "medium_slow",
         "pause_after_ms": 420,
         "emphasis": ["实在人", "周报二字", "圣旨到"],
-        "sfx_after": ["waking_block"]
+        "sfx_after": []
       }
     },
     {

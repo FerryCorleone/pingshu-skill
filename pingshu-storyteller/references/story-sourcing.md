@@ -10,6 +10,51 @@
 4. 多个独立 recap 只作为线索。
 5. 缺少视觉细节时，再选择性检查视频或关键帧。
 
+## 长内容和整集硬流程
+
+用户要听“整集”“全集”“完整一期”“最后一期”“总决赛”“某一集完整评书音频”时，不能把简介、赛果、百科或新闻通稿当成整集内容。那只能支撑“复盘”，不能支撑“还原节目/剧情”。
+
+先在 `story_pack.source_hunt` 里记录素材搜索过程：
+
+```json
+{
+  "intent_type": "full_episode | long_episode | scene_clip | event_recap",
+  "searched_platforms": ["official_site", "bilibili", "youtube", "douyin", "xiaohongshu", "weibo", "search_engine"],
+  "search_queries": ["节目名 第12期 完整版", "节目名 总决赛 纯享", "show name finale full episode"],
+  "usable_materials": [
+    {
+      "source_id": "src-001",
+      "platform": "string",
+      "material_type": "full_video | official_clip | fan_clip | subtitle | asr | recap | article | timeline_post",
+      "coverage": "full | partial | key_scene | outcome_only",
+      "time_range": "00:00-12:30 或 unknown",
+      "access_status": "accessible | login_required | blocked | unavailable",
+      "notes": "能提供哪些剧情、动作、台词、舞台或反应细节。"
+    }
+  ],
+  "coverage_level": "scene_level | multi_clip_scene_level | full_episode_transcript | full_episode_video_asr | user_supplied_episode | outline_only | insufficient",
+  "decision": "continue_to_script | gather_more | ask_user_for_source | downgrade_to_recap"
+}
+```
+
+搜索顺序建议：
+
+1. 官方平台：节目官网、正片页、官方 YouTube 频道、官方短视频号、纯享舞台、花絮和新闻稿。
+2. 长视频和社区：B 站、YouTube、腾讯视频、优酷、爱奇艺、芒果、微博视频、抖音、小红书，优先带字幕、分 P、时间戳或合集的材料。
+3. 搜索引擎：同时用中文、英文、节目别名、嘉宾名、集数、舞台名、`完整版`、`完整`、`cut`、`纯享`、`reaction`、`recap`、`transcript`、`subtitle`、`timestamp` 等关键词。
+4. 二手线索：影视解说、论坛、微博长文、豆瓣小组、Reddit、评论区时间线只做定位线索，不能直接洗成正文。
+5. ASR/OCR：有可访问音视频时，先复用本机已有 ASR 缓存；只有关键画面缺失时，再抽关键帧或截图做视觉观察。
+
+最低门槛：
+
+- `scene_trace` 必须覆盖主要流程，而不是只覆盖结果；
+- 每个关键场景至少有来源、可见动作/听见的台词功能、人物反应和局势变化；
+- 对综艺整期，要覆盖开场规则、主要表演/任务、关键分数或投票、人物反应、转折和结局；
+- 对电视剧/动漫整集，要覆盖开端、触发、几次升级、高潮和收束；
+- 如果 `coverage_level` 只能到 `outline_only` 或 `outcome_only`，必须继续找素材或明确询问用户，不能生成“完整评书音频”。
+
+用户个人娱乐收听时，Agent 可以用公开网页、用户已登录页面、视频平台片段、字幕和 ASR 来帮助理解内容；但不要把原始视频/音频重新分发。默认交付的是评书化转述音频，上传也默认限个人云盘或本地收听。
+
 ## 最小可用 story pack
 
 一个可用的 `story_pack` 至少需要：
