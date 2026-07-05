@@ -22,43 +22,48 @@
 
 ## 怎么安装
 
-这个项目是一个通用 Skill，不绑定某一个 Agent 产品。安装方式取决于你使用的 Agent 是否支持本地 Skill。
+这个项目是一个通用 Skill，不绑定某一个 Agent 产品。推荐用 `skills` 管理工具安装，不需要手动 clone 仓库。
 
-通常流程是：
-
-1. 下载仓库：
+安装到当前/默认 Agent：
 
 ```bash
-git clone https://github.com/FerryCorleone/pingshu-skill.git
-cd pingshu-skill
+npx skills add FerryCorleone/pingshu-skill -g --skill pingshu-skill
 ```
 
-2. 把 `pingshu-skill/` 这个目录复制或链接到你的 Agent 的 Skills 目录。
+如果你想一次同步到 `skills` 支持的所有 Agent：
 
-3. 重新启动或刷新 Agent，让它重新加载本地 Skills。
+```bash
+npx skills add FerryCorleone/pingshu-skill -g --skill pingshu-skill --agent '*' --yes
+```
 
-4. 在对话里这样使用：
+更新到最新版本：
+
+```bash
+npx skills update pingshu-skill -g
+```
+
+不安装、只临时把 Skill 提示词拿出来用：
+
+```bash
+npx skills use FerryCorleone/pingshu-skill@pingshu-skill
+```
+
+安装后重新启动或刷新 Agent，让它重新加载本地 Skills。然后在对话里这样使用：
 
 ```text
 使用 pingshu.Skill，把这个片段改成一段 3 分钟左右的现代评书音频。
 ```
 
-如果你的 Agent 没有 Skill 目录，也可以让它直接读取 `pingshu-skill/SKILL.md`，再按里面的工作流执行。
+如果你的 Agent 暂时不支持 `skills` 管理工具，也可以让它直接读取仓库里的 `pingshu-skill/SKILL.md`，再按里面的工作流执行。
 
 ## 需要准备什么
 
 ### 基础环境
 
-- Node.js 18 或更高版本；
+- Node.js 18 或更高版本，能运行 `npx`；
 - 一个支持读取本地 Skill 的 Agent；
 - 如果要生成音频，还需要配置本地 TTS 模型或 API TTS。
 - 如果想把音频同步到常用播放器，可以额外配置网易云音乐开放平台/API key，用来上传到网易云音乐云盘。
-
-可以先跑一次结构校验：
-
-```bash
-node pingshu-skill/scripts/validate_skill_outputs.mjs examples
-```
 
 ### 本地 TTS 怎么选
 
