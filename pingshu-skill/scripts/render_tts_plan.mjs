@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 
 const DEFAULT_REFERENCE_VOICE = {
   id: "pingshu_default_storyteller_c06",
-  path_or_id: "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
-  manifest: "pingshu-storyteller/assets/voice/manifest.json",
+  path_or_id: "pingshu-skill/assets/voice/default_storyteller_c06.wav",
+  manifest: "pingshu-skill/assets/voice/manifest.json",
   consent_status: "project_generated_original",
   rights_note: "Bundled generated original storyteller reference voice; not a real-person clone.",
   reference_text:

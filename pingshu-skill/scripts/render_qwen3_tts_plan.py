@@ -36,7 +36,7 @@ DEFAULT_REF_TEXT = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Render pingshu-storyteller performance_plan.json with local Qwen3-TTS."
+        description="Render pingshu-skill performance_plan.json with local Qwen3-TTS."
     )
     parser.add_argument("performance_plan", help="Path to performance_plan.json")
     parser.add_argument("output_dir", help="Directory for segments and final audio")

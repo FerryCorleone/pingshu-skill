@@ -47,7 +47,7 @@ DEFAULT_REFERENCE_TEXT = (
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Render pingshu-storyteller performance_plan.json with VoxCPM2."
+        description="Render pingshu-skill performance_plan.json with VoxCPM2."
     )
     parser.add_argument("performance_plan", help="Path to performance_plan.json")
     parser.add_argument("output_dir", help="Directory for segments and final audio")
@@ -567,7 +567,7 @@ def main() -> int:
     if plan_voice.get("performance_mode") not in (None, "single_performer"):
         print(
             "Warning: performance_plan.voice.performance_mode is not single_performer; "
-            "pingshu-storyteller expects one narrator voice.",
+            "pingshu-skill expects one narrator voice.",
             file=sys.stderr,
         )
     if voice_lock and not args.single_pass and not (args.reference_wav or args.prompt_wav):

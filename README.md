@@ -28,11 +28,11 @@
 1. 下载仓库：
 
 ```bash
-git clone https://github.com/FerryCorleone/pingshu-storyteller.git
-cd pingshu-storyteller
+git clone https://github.com/FerryCorleone/pingshu-skill.git
+cd pingshu-skill
 ```
 
-2. 把 `pingshu-storyteller/` 这个目录复制或链接到你的 Agent 的 Skills 目录。
+2. 把 `pingshu-skill/` 这个目录复制或链接到你的 Agent 的 Skills 目录。
 
 3. 重新启动或刷新 Agent，让它重新加载本地 Skills。
 
@@ -42,7 +42,7 @@ cd pingshu-storyteller
 使用 pingshu.Skill，把这个片段改成一段 3 分钟左右的现代评书音频。
 ```
 
-如果你的 Agent 没有 Skill 目录，也可以让它直接读取 `pingshu-storyteller/SKILL.md`，再按里面的工作流执行。
+如果你的 Agent 没有 Skill 目录，也可以让它直接读取 `pingshu-skill/SKILL.md`，再按里面的工作流执行。
 
 ## 需要准备什么
 
@@ -56,7 +56,7 @@ cd pingshu-storyteller
 可以先跑一次结构校验：
 
 ```bash
-node pingshu-storyteller/scripts/validate_skill_outputs.mjs examples
+node pingshu-skill/scripts/validate_skill_outputs.mjs examples
 ```
 
 ### 默认人声
@@ -64,7 +64,7 @@ node pingshu-storyteller/scripts/validate_skill_outputs.mjs examples
 `pingshu.Skill` 内置一段默认参考人声：
 
 ```text
-pingshu-storyteller/assets/voice/default_storyteller_c06.wav
+pingshu-skill/assets/voice/default_storyteller_c06.wav
 ```
 
 这是一段原创生成的中老年北方说书人音源，不是真实艺人克隆。默认情况下，本地 VoxCPM2 / Qwen3-TTS 会直接使用它；API voice clone 路线只有在用户选择服务商并确认上传条款后才会使用它。
@@ -83,7 +83,7 @@ pingshu-storyteller/assets/voice/default_storyteller_c06.wav
 推荐先让 Agent 运行：
 
 ```bash
-node pingshu-storyteller/scripts/check_local_tts_device.mjs
+node pingshu-skill/scripts/check_local_tts_device.mjs
 ```
 
 如果检测结果暂时不适合本地跑，也没关系，先走 API TTS 会更省心。等以后换机器、加显卡，或者有云 GPU 环境，再回来折腾本地模型也完全可以。
@@ -126,7 +126,7 @@ node pingshu-storyteller/scripts/check_local_tts_device.mjs
 ## 目录里有什么
 
 ```text
-pingshu-storyteller/
+pingshu-skill/
   SKILL.md                 # Agent 读取的 Skill 入口
   references/              # 写作、TTS、版权、交付规则
   scripts/                 # 校验、设备检测、TTS、上传辅助脚本
@@ -142,9 +142,9 @@ LICENSE                    # MIT 许可证
 ## 开发者校验
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" pingshu-storyteller
-node pingshu-storyteller/scripts/validate_skill_outputs.mjs examples
-node pingshu-storyteller/scripts/lint_pingshu_quality.mjs examples/story_pack.json examples/pingshu_script.json
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" pingshu-skill
+node pingshu-skill/scripts/validate_skill_outputs.mjs examples
+node pingshu-skill/scripts/lint_pingshu_quality.mjs examples/story_pack.json examples/pingshu_script.json
 ```
 
 ## 许可证

@@ -5,7 +5,7 @@
 仓库内置一段默认说书人参考音频：
 
 ```text
-pingshu-storyteller/assets/voice/default_storyteller_c06.wav
+pingshu-skill/assets/voice/default_storyteller_c06.wav
 ```
 
 它是一段本项目用本地 VoxCPM2 工作流生成的原创参考声，用来帮助本地 TTS 和支持 voice clone 的 API 更接近默认说书人口吻。它不是对真实艺人、主播或普通人的声音克隆。
@@ -13,7 +13,7 @@ pingshu-storyteller/assets/voice/default_storyteller_c06.wav
 参考文本和资产信息记录在：
 
 ```text
-pingshu-storyteller/assets/voice/manifest.json
+pingshu-skill/assets/voice/manifest.json
 ```
 
 本地 VoxCPM2 / Qwen3-TTS 可以默认使用这段音频。API voice clone 路线会把参考音频上传到第三方服务商，必须先由用户确认所选服务商条款、数据政策和上传范围；如果用户不接受上传，就使用 voice design 或服务商系统音色试听。
@@ -25,7 +25,7 @@ pingshu-storyteller/assets/voice/manifest.json
 仓库内置一个醒木音效：
 
 ```text
-pingshu-storyteller/assets/sfx/waking_block.wav
+pingshu-skill/assets/sfx/waking_block.wav
 ```
 
 它用于评书开场、关键转折或结尾收束。Skill 的规则是少量使用：短节目通常一次，最多两次，且只作为后期音频层插入，不写进 TTS 朗读文本。

@@ -2,7 +2,7 @@
 
 ## 结论
 
-当前保留一个用户可见的 `pingshu-storyteller` Skill，内部拆成三段子工作流：
+当前保留一个用户可见的 `pingshu-skill` Skill，内部拆成三段子工作流：
 
 ```text
 素材获取 -> 评书化改编 -> TTS 渲染
@@ -49,7 +49,7 @@
 2. `modern-pingshu-adapter`：从已经整理好的 story pack 做纯文本评书化改编。
 3. `tts-performance-renderer`：通用口播、评书、有声书、讲解类内容的表演渲染。
 
-到那时，`pingshu-storyteller` 仍然作为总编排 Skill；高级 Agent 可以直接调用子 Skill，普通用户还是只调用一个总入口。
+到那时，`pingshu-skill` 仍然作为总编排 Skill；高级 Agent 可以直接调用子 Skill，普通用户还是只调用一个总入口。
 
 ## 用户体验规则
 
@@ -70,9 +70,9 @@
 当前仓库保持：
 
 ```text
-pingshu-storyteller/SKILL.md        # 用户可见入口
-pingshu-storyteller/references/     # 子工作流说明
-pingshu-storyteller/scripts/        # 可复用检查/渲染脚本
+pingshu-skill/SKILL.md        # 用户可见入口
+pingshu-skill/references/     # 子工作流说明
+pingshu-skill/scripts/        # 可复用检查/渲染脚本
 docs/                               # 产品、研究、架构文档
 runs/                               # 本地实验和输出，默认不入库
 ```

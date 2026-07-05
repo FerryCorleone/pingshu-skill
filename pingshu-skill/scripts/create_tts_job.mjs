@@ -18,7 +18,7 @@ const providers = {
     mode: "api",
     required_env: ["QWEN_TTS_API_KEY"],
     alternative_env: ["DASHSCOPE_API_KEY"],
-    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen",
+    command_hint: "node pingshu-skill/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen",
     notes: [
       "Use Qwen3-TTS-Instruct-Flash through Alibaba Cloud Model Studio / DashScope.",
       "Use one supported system voice for the whole program and insert pauses in post-processing."
@@ -29,7 +29,7 @@ const providers = {
     required_env: ["QWEN_TTS_API_KEY"],
     alternative_env: ["DASHSCOPE_API_KEY"],
     reference_voice_required: true,
-    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen-voiceclone --phrase-chunks",
+    command_hint: "node pingshu-skill/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider qwen-voiceclone --phrase-chunks",
     notes: [
       "Use Alibaba Cloud Model Studio voice enrollment to create or reuse a Qwen voice clone id.",
       "By default, use the bundled generated storyteller reference voice from the performance plan after the user accepts provider upload terms.",
@@ -41,7 +41,7 @@ const providers = {
     mode: "api",
     required_env: ["XIAOMI_MIMO_API_KEY"],
     alternative_env: ["MIMO_API_KEY"],
-    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo",
+    command_hint: "node pingshu-skill/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo",
     notes: [
       "Use MiMo V2.5 TTS / voice design through Xiaomi's official chat completions endpoint.",
       "Prefer segmented rendering for long pingshu scripts, then insert real silence and concatenate.",
@@ -53,7 +53,7 @@ const providers = {
     required_env: ["XIAOMI_MIMO_API_KEY"],
     alternative_env: ["MIMO_API_KEY"],
     reference_voice_required: true,
-    command_hint: "node pingshu-storyteller/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo-voiceclone --request-delay-ms 15000",
+    command_hint: "node pingshu-skill/scripts/render_api_tts_plan.mjs <pingshu_script.json> <performance_plan.json> <out_dir> --provider xiaomi-mimo-voiceclone --request-delay-ms 15000",
     notes: [
       "Use MiMo V2.5 TTS voice clone with an original/licensed reference wav.",
       "By default, use the bundled generated storyteller reference voice from the performance plan after the user accepts provider upload terms.",
@@ -88,7 +88,7 @@ const providers = {
   "local-voxcpm2": {
     mode: "local",
     required_env: [],
-    command_hint: "python pingshu-storyteller/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir> --segment-performance --pace-tempo",
+    command_hint: "python pingshu-skill/scripts/render_voxcpm2_plan.py <performance_plan.json> <out_dir> --segment-performance --pace-tempo",
     notes: [
       "Install VoxCPM2 in a Python 3.10-3.12 environment with torch and torchaudio.",
       "The renderer uses the bundled generated default storyteller reference voice unless the user provides another original or licensed voice.",
@@ -100,7 +100,7 @@ const providers = {
     mode: "local",
     required_env: [],
     reference_voice_required: false,
-    command_hint: "python pingshu-storyteller/scripts/render_qwen3_tts_plan.py <performance_plan.json> <out_dir>",
+    command_hint: "python pingshu-skill/scripts/render_qwen3_tts_plan.py <performance_plan.json> <out_dir>",
     notes: [
       "Install qwen-tts in .venv-qwen3-tts or set PINGSHU_QWEN3_TTS_PYTHON.",
       "Use Qwen3-TTS Base for local reference-audio voice clone rendering.",
@@ -143,8 +143,8 @@ const job = {
   voice: plan.voice || {},
   default_reference_voice: plan.voice?.reference_voice || {
     id: "pingshu_default_storyteller_c06",
-    path_or_id: "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
-    manifest: "pingshu-storyteller/assets/voice/manifest.json",
+    path_or_id: "pingshu-skill/assets/voice/default_storyteller_c06.wav",
+    manifest: "pingshu-skill/assets/voice/manifest.json",
     reference_text: DEFAULT_REFERENCE_TEXT,
     consent_status: "project_generated_original"
   },
@@ -173,7 +173,7 @@ const job = {
   post_process: {
     insert_pauses: true,
     add_sfx_after_segments: true,
-    sfx_assets_dir: "pingshu-storyteller/assets/sfx",
+    sfx_assets_dir: "pingshu-skill/assets/sfx",
     prop_sfx_policy: plan.audio_bed?.prop_sfx_policy || {
       allowed_ids: ["waking_block"],
       insert_mode: "post_tts_timeline",

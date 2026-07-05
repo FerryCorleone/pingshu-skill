@@ -11,8 +11,8 @@
     "reference_voice": {
       "id": "pingshu_default_storyteller_c06",
       "required_for_split_render": "recommended",
-      "path_or_id": "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
-      "manifest": "pingshu-storyteller/assets/voice/manifest.json",
+      "path_or_id": "pingshu-skill/assets/voice/default_storyteller_c06.wav",
+      "manifest": "pingshu-skill/assets/voice/manifest.json",
       "reference_text": "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。",
       "consent_status": "project_generated_original",
       "rights_note": "Bundled generated original storyteller reference voice; not a real-person clone."

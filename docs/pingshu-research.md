@@ -15,7 +15,7 @@
 
 项目早期参考过若干公开的现代说书/评书化内容，用来观察“传统口头叙事如何讲现代动漫、综艺和热点”。这些研究只沉淀为可迁移的方法论，不在公开仓库里保留具体下载媒体、完整转录、平台登录态、内部路径或可识别的私人样本清单。
 
-更深入的公开摘要见 `docs/style-study.md`。评书、相声、脱口秀融合方法见 `docs/comedy-method-synthesis.md`。给 Agent 写稿时直接用的方法卡在 `pingshu-storyteller/references/modern-pingshu-method-cards.md`。
+更深入的公开摘要见 `docs/style-study.md`。评书、相声、脱口秀融合方法见 `docs/comedy-method-synthesis.md`。给 Agent 写稿时直接用的方法卡在 `pingshu-skill/references/modern-pingshu-method-cards.md`。
 
 可长期复用的发现：
 

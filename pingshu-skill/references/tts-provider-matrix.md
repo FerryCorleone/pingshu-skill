@@ -36,7 +36,7 @@
 本地安装前先运行：
 
 ```bash
-node pingshu-storyteller/scripts/check_local_tts_device.mjs
+node pingshu-skill/scripts/check_local_tts_device.mjs
 ```
 
 如果脚本输出 `needs-user-config`，让用户补充电脑型号、内存、GPU 型号和显存；如果输出 `cloud-api`，不要继续安装本地模型。

@@ -121,8 +121,8 @@ try {
         enabled: false,
         requires_user_confirmation: true,
         status: "needs-readiness-check",
-        readiness_command: "node pingshu-storyteller/scripts/check_delivery_readiness.mjs netease-cloud",
-        publish_command_hint: `node pingshu-storyteller/scripts/publish_netease_cloud.mjs ${JSON.stringify(audioPath)} <manifest.json>`,
+        readiness_command: "node pingshu-skill/scripts/check_delivery_readiness.mjs netease-cloud",
+        publish_command_hint: `node pingshu-skill/scripts/publish_netease_cloud.mjs ${JSON.stringify(audioPath)} <manifest.json>`,
         setup_notes: [
           "首次使用需要 Agent 安装网易云音乐官方 ncm-cli：npm install -g @music163/ncm-cli。",
           "首次使用需要 Agent 打开网易云音乐开放平台：https://developer.music.163.com/st/developer/apply/account?type=INDIVIDUAL。",

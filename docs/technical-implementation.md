@@ -135,14 +135,14 @@ API 候选：
 - [VoxCPM2 / OpenBMB VoxCPM](https://github.com/OpenBMB/VoxCPM)：本地高质量默认档，适合中文评书主声线。
 - [Qwen3-TTS 0.6B Base](https://github.com/QwenLM/Qwen3-TTS)：本地低配兜底档，适合配置不够跑 VoxCPM2 但仍想离线试用的用户。
 
-本地路线不做模型大全。用户选择本地 TTS 时，Agent 先运行 `pingshu-storyteller/scripts/check_local_tts_device.mjs` 检测机器配置：
+本地路线不做模型大全。用户选择本地 TTS 时，Agent 先运行 `pingshu-skill/scripts/check_local_tts_device.mjs` 检测机器配置：
 
 - 满足 VoxCPM2 最低配置：推荐 `local-voxcpm2`。
 - 不满足 VoxCPM2 但满足 Qwen3-TTS 0.6B：推荐 `local-qwen3-tts`。
 - 两个都不满足：建议走云端 API。
 - 检测不到 GPU/显存时：让用户补充电脑型号、内存、GPU 型号和显存，不要猜。
 
-Skill 内置默认说书人参考音源在 `pingshu-storyteller/assets/voice/default_storyteller_c06.wav`，资产信息和参考文本在 `pingshu-storyteller/assets/voice/manifest.json`。本地 VoxCPM2 / Qwen3-TTS 默认直接使用它；API voice clone 只有在用户选择服务商并确认上传条款后才使用它。
+Skill 内置默认说书人参考音源在 `pingshu-skill/assets/voice/default_storyteller_c06.wav`，资产信息和参考文本在 `pingshu-skill/assets/voice/manifest.json`。本地 VoxCPM2 / Qwen3-TTS 默认直接使用它；API voice clone 只有在用户选择服务商并确认上传条款后才使用它。
 
 最低配置建议：
 
@@ -153,13 +153,13 @@ Skill 内置默认说书人参考音源在 `pingshu-storyteller/assets/voice/def
 
 服务商专用适配器应该放在核心契约之外，或作为小型可选脚本存在。不要把服务商 key 变成必需条件。
 
-第一层适配器是 `pingshu-storyteller/scripts/create_tts_job.mjs`，它把通用 `performance_plan.json` 转成服务商专用任务骨架。它不会直接调用付费 API 或本地模型，只记录用户的服务商选择、所需环境变量、分段输入和下一步命令提示。
+第一层适配器是 `pingshu-skill/scripts/create_tts_job.mjs`，它把通用 `performance_plan.json` 转成服务商专用任务骨架。它不会直接调用付费 API 或本地模型，只记录用户的服务商选择、所需环境变量、分段输入和下一步命令提示。
 
-正式渲染前，Agent 必须运行 `pingshu-storyteller/scripts/check_tts_readiness.mjs <provider>`。如果 API key、本地 Python 环境或模型运行时缺失，就停下来让用户配置。系统语音只能做临时连通性测试，不能冒充最终音频。
+正式渲染前，Agent 必须运行 `pingshu-skill/scripts/check_tts_readiness.mjs <provider>`。如果 API key、本地 Python 环境或模型运行时缺失，就停下来让用户配置。系统语音只能做临时连通性测试，不能冒充最终音频。
 
 ### 道具音效层
 
-醒木等传统道具音效不属于 TTS 文本，而是后期音频层。Skill 内置一个固定资产在 `pingshu-storyteller/assets/sfx/`：
+醒木等传统道具音效不属于 TTS 文本，而是后期音频层。Skill 内置一个固定资产在 `pingshu-skill/assets/sfx/`：
 
 - `waking_block.wav`：醒木，用于开书定场、关键转折留扣或结尾收束。
 
@@ -167,7 +167,7 @@ Skill 内置默认说书人参考音源在 `pingshu-storyteller/assets/voice/def
 
 ### 本地 VoxCPM2 渲染
 
-`pingshu-storyteller/scripts/render_voxcpm2_plan.py` 是给选择 VoxCPM2 的用户准备的可选本地渲染器。
+`pingshu-skill/scripts/render_voxcpm2_plan.py` 是给选择 VoxCPM2 的用户准备的可选本地渲染器。
 
 使用约束：
 

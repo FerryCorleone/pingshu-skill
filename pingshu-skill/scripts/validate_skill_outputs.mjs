@@ -345,4 +345,4 @@ for (const fileName of optionalFiles) {
   checked += 1;
 }
 
-console.log(`OK: validated ${checked} pingshu-storyteller artifact(s) in ${base}`);
+console.log(`OK: validated ${checked} pingshu-skill artifact(s) in ${base}`);

@@ -2,7 +2,7 @@
 
 ## Project Intent
 
-This repository builds `pingshu-storyteller`, a portable Agent Skill that turns sourced story material into respectful Chinese pingshu-style scripts and provider-neutral TTS performance plans.
+This repository builds `pingshu-skill`, a portable Agent Skill that turns sourced story material into respectful Chinese pingshu-style scripts and provider-neutral TTS performance plans.
 
 The goal is not to parody or replace traditional pingshu artists. Treat pingshu as a living performance tradition: preserve respect for its craft, cite sources, avoid voice impersonation, and make modern adaptations clearly transformative.
 
@@ -10,7 +10,7 @@ The goal is not to parody or replace traditional pingshu artists. Treat pingshu 
 
 - Keep the skill usable by different agents and operating systems. Prefer plain Markdown, JSON, and Node.js scripts without native dependencies.
 - Do not require macOS-only tools, shell-specific behavior, or browser automation for the core workflow.
-- Keep `pingshu-storyteller/SKILL.md` concise. Put detailed knowledge in `pingshu-storyteller/references/`.
+- Keep `pingshu-skill/SKILL.md` concise. Put detailed knowledge in `pingshu-skill/references/`.
 - Use structured intermediate artifacts:
   - `story_pack.json`
   - `pingshu_script.json`
@@ -24,8 +24,8 @@ The goal is not to parody or replace traditional pingshu artists. Treat pingshu 
 Run these before claiming the skill is ready:
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" pingshu-storyteller
-node pingshu-storyteller/scripts/validate_skill_outputs.mjs examples
+python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" pingshu-skill
+node pingshu-skill/scripts/validate_skill_outputs.mjs examples
 git status --short
 ```
 

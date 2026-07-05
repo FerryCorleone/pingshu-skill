@@ -227,7 +227,7 @@
 
 `performance_plan` 是给 TTS 和后期的表演计划。它不绑定某个 provider。
 
-默认情况下，`reference_voice.path_or_id` 使用内置人声 `pingshu-storyteller/assets/voice/default_storyteller_c06.wav`，并把 `assets/voice/manifest.json` 里的 `reference_text` 一并写入计划。用户如果指定自己的原创或已授权参考音频，可以覆盖这些字段，但必须记录授权状态。
+默认情况下，`reference_voice.path_or_id` 使用内置人声 `pingshu-skill/assets/voice/default_storyteller_c06.wav`，并把 `assets/voice/manifest.json` 里的 `reference_text` 一并写入计划。用户如果指定自己的原创或已授权参考音频，可以覆盖这些字段，但必须记录授权状态。
 
 ```json
 {
@@ -242,8 +242,8 @@
     "role_voice_policy": "same voice; character shifts use pacing, pressure, wording, and pauses instead of separate timbres",
     "reference_voice": {
       "required_for_split_render": "recommended | required | not_required",
-      "path_or_id": "pingshu-storyteller/assets/voice/default_storyteller_c06.wav",
-      "manifest": "pingshu-storyteller/assets/voice/manifest.json",
+      "path_or_id": "pingshu-skill/assets/voice/default_storyteller_c06.wav",
+      "manifest": "pingshu-skill/assets/voice/manifest.json",
       "reference_text": "列位，闲言少叙，书归正传。今儿咱讲一段新鲜故事，有人物，有包袱，也有那么一点北方说书的劲儿。您把耳朵支棱起来，咱慢慢往下说。",
       "consent_status": "project_generated_original | original | licensed | user_owned | unknown",
       "rights_note": "Bundled generated original storyteller reference voice; not a real-person clone."
@@ -349,8 +349,8 @@
       "enabled": false,
       "requires_user_confirmation": true,
       "status": "needs-readiness-check",
-      "readiness_command": "node pingshu-storyteller/scripts/check_delivery_readiness.mjs netease-cloud",
-      "publish_command_hint": "node pingshu-storyteller/scripts/publish_netease_cloud.mjs <audio_path> <manifest.json>",
+      "readiness_command": "node pingshu-skill/scripts/check_delivery_readiness.mjs netease-cloud",
+      "publish_command_hint": "node pingshu-skill/scripts/publish_netease_cloud.mjs <audio_path> <manifest.json>",
       "setup_notes": [
         "首次使用需要安装网易云音乐官方 ncm-cli。",
         "首次使用需要 Agent 打开网易云音乐开放平台，让用户在网页里取得 API 凭证。",

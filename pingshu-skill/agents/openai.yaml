@@ -1,0 +1,4 @@
+interface:
+  display_name: "评书说书"
+  short_description: "把有来源的故事改成现代中文评书脚本和 TTS 表演计划"
+  default_prompt: "使用 $pingshu-skill，把这个素材改成有来源、有包袱、适合通勤听的中文评书脚本和 TTS 表演计划。"
